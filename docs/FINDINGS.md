@@ -166,3 +166,12 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 - **The placebo is a problem for any break interpretation.** A break at 2024-07-18, estimated on data ending 2025-06-16, gives δ = +23.1 bp (p = 0.002), with a "post" β of +9.6 bp. The flow–yield association is not stable over time even absent any legislative event, so even a significant GENIUS δ could not have been attributed to the Act. We report this prominently.
 
 **Power:** N_post = 312 at h = 10. The SE of δ₁₀ is 5.2 bp per USD 10 bn, so the minimum detectable difference at 80% power (two-sided 5%) is roughly 2.8 × 5.2 ≈ 15 bp per USD 10 bn. That is about 1.4 times the entire pre-enactment estimate, so the design is underpowered for plausible changes.
+
+## Phase 4 — Writing (2026-10-31T11:26Z)
+
+- README.md written (11 sections). The prose is ~1,570 words excluding tables, code and references; the abstract is 138 words.
+- docs/LINKEDIN.md: post body 1,229 characters, no emoji, 2-line alt-text. docs/SUMMARY_TH.md: 10 lines. docs/REPO_META.md: About text and topics verbatim from the brief.
+- Every number in the text was re-read from output/tables/lp_results.json (scaled ×10 or ×3.5) before writing. The README also adds δ₂₀ = +19.6 bp (p = 0.08) so the long-horizon gap is not hidden.
+- Statute citation checked against the govinfo text: Public Law 119-27, 139 Stat. 419.
+- "Why this matters" quotes the BIS AER 2025 Chapter III (ar2025e3.htm): "can already depress Treasury yields by around 2.5–5 basis points", and Treasury holdings "on par with large jurisdictions and government money market funds".
+- Deviation from the brief's layout: src/utils.py was added (config, logging, cached HTTP). The CoinGecko and Treasury fallbacks are listed in config.yaml but were not needed or built, because no primary source failed.
