@@ -112,17 +112,13 @@ def _zero(ax: plt.Axes) -> None:
     ax.axhline(0, color=INK2, lw=0.8)
 
 
-def fig1_irf_pre_post(cfg: dict[str, Any], res: dict[str, Any], linkedin: bool = False) -> None:
+def fig1_irf_pre_post(cfg: dict[str, Any], res: dict[str, Any]) -> None:
     """Hero figure: DTB3 IRF pre vs post, per USD 10 bn of 5-day inflow."""
     sc = cfg["lp"]["scale_bn"]
     d = pd.DataFrame(res["primary"])
     r10 = d.set_index("h").loc[10]
-    if linkedin:
-        fig, ax = plt.subplots(figsize=(6, 6))
-        fig.subplots_adjust(left=0.13, right=0.96, top=0.78, bottom=0.2)
-    else:
-        fig, ax = plt.subplots(figsize=(8, 5.2))
-        fig.subplots_adjust(left=0.09, right=0.97, top=0.83, bottom=0.2)
+    fig, ax = plt.subplots(figsize=(8, 5.2))
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.83, bottom=0.2)
     _irf(ax, d, "pre", "pre_se", sc, PRE, PRE_BAND, "Pre-enactment (2021-01 to 2025-07-17)")
     _irf(ax, d, "post", "post_se", sc, BLUE, "#86b6ef", "Post-enactment (2025-07-18 to 2026-10)")
     _zero(ax)
@@ -133,30 +129,87 @@ def fig1_irf_pre_post(cfg: dict[str, Any], res: dict[str, Any], linkedin: bool =
     last = d.iloc[-1]
     ax.annotate("pre", (20, last.pre * sc), xytext=(-4, -12), textcoords="offset points", ha="right", color=INK2)
     ax.annotate("post", (20, last.post * sc), xytext=(-4, 8), textcoords="offset points", ha="right", color=INK2)
-    ax.legend(loc="lower left", fontsize=8 if not linkedin else 9)
+    ax.legend(loc="lower left", fontsize=8)
     sub = (f"Per USD 10 bn 5-day inflow into fiat-backed stablecoins. N_pre = {int(r10.N_pre)}, "
            f"N_post = {int(r10.N_post)} business days (h = 10). At h = 10: pre {r10.pre*sc:.1f} bp, "
            f"post {r10.post*sc:.1f} bp, difference p = {r10.diff_p:.2f}.")
-    if linkedin:
-        fig.suptitle("Since the GENIUS Act, stablecoin inflows have not\nmoved 3-month T-bill yields more than before",
-                     x=0.02, y=0.975, ha="left", fontsize=14, fontweight="bold")
-        fig.text(0.02, 0.83, textwrap.fill(sub, 85), fontsize=9, color=INK2)
-        ax.tick_params(labelsize=10)
-        ax.xaxis.label.set_size(11)
-        ax.yaxis.label.set_size(11)
-        footer(fig, "Local projections with controls (not IV); 68% and 90% Newey–West bands. Association, not "
-                    "causation. Code + data: github.com/thanatchon36/stablecoin-tbills-genius-act", size=8, width=95)
-        save(fig, cfg, "fig_linkedin", dpi=200)
-    else:
-        fig.suptitle("3-month T-bill response to stablecoin inflows, before vs after the GENIUS Act",
-                     x=0.01, ha="left", fontsize=12, fontweight="bold")
-        fig.text(0.01, 0.885, textwrap.fill(sub, 125), fontsize=8.5, color=INK2)
-        footer(fig, "Jordà local projection of y(t+h) − y(t−1) on the 5-day flow, flow × Post, Post and controls "
-                    "(lags 1–5 of Δy and daily flow; ΔDGS2, ΔVIX, BTC and S&P 500 returns, Δlog RRP). Lines: point "
-                    "estimates; shaded: 68% (dark) and 90% (light) Newey–West bands (maxlags = h+1). Post = signed "
-                    "into law 18 Jul 2025; reserve rules not yet binding (effective 18 Jan 2027). Controls-only, "
-                    "not instrumented: association, not causation.")
-        save(fig, cfg, "fig1_irf_pre_post")
+    fig.suptitle("3-month T-bill response to stablecoin inflows, before vs after the GENIUS Act",
+                 x=0.01, ha="left", fontsize=12, fontweight="bold")
+    fig.text(0.01, 0.885, textwrap.fill(sub, 125), fontsize=8.5, color=INK2)
+    footer(fig, "Jordà local projection of y(t+h) − y(t−1) on the 5-day flow, flow × Post, Post and controls "
+                "(lags 1–5 of Δy and daily flow; ΔDGS2, ΔVIX, BTC and S&P 500 returns, Δlog RRP). Lines: point "
+                "estimates; shaded: 68% (dark) and 90% (light) Newey–West bands (maxlags = h+1). Post = signed "
+                "into law 18 Jul 2025; reserve rules not yet binding (effective 18 Jan 2027). Controls-only, "
+                "not instrumented: association, not causation.")
+    save(fig, cfg, "fig1_irf_pre_post")
+
+
+ACCENT = "#b2182b"
+
+
+def fig_linkedin(cfg: dict[str, Any], res: dict[str, Any]) -> None:
+    """4:5 social card (1200 x 1500 px): (a) pre/post IRF, (b) change at the Act vs a placebo date."""
+    sc = cfg["lp"]["scale_bn"]
+    d = pd.DataFrame(res["primary"])
+    r10 = d.set_index("h").loc[10]
+    rb = res["robustness"]
+    fig = plt.figure(figsize=(6, 7.5))
+    fig.text(0.04, 0.965, "Did the GENIUS Act strengthen the link between\nstablecoin inflows and T-bill yields? Not so far.",
+             ha="left", va="top", fontsize=14.5, fontweight="bold", linespacing=1.15)
+    fig.text(0.04, 0.887, "3-month US Treasury bill · per USD 10 bn five-day inflow into fiat-backed\n"
+             "stablecoins · daily, Jan 2021 to Oct 2026 · pre-registered local projections",
+             ha="left", va="top", fontsize=8.6, color=INK2, linespacing=1.35)
+
+    # (a) impulse responses
+    fig.text(0.04, 0.815, "a  Yield response after the inflow", fontsize=10, fontweight="bold", va="top")
+    a = fig.add_axes((0.12, 0.505, 0.83, 0.285))
+    _irf(a, d, "pre", "pre_se", sc, PRE, PRE_BAND, "Before the Act")
+    _irf(a, d, "post", "post_se", sc, BLUE, "#86b6ef", "After the Act")
+    _zero(a)
+    a.axvline(10, color=INK2, lw=0.7, ls=(0, (1, 2)))
+    a.set_xlim(0, 20)
+    a.set_xticks(range(0, 21, 5))
+    a.set_xlabel("Business days after the flow", fontsize=9)
+    a.set_ylabel("Change in yield (bp)", fontsize=9)
+    a.annotate(f"Before: {r10.pre * sc:.1f} bp at day 10".replace("-", "\u2212"), (10, r10.pre * sc),
+               xytext=(10.4, -36), textcoords="data", fontsize=8.5, color=PRE, fontweight="bold",
+               arrowprops={"arrowstyle": "-", "color": PRE, "lw": 0.8})
+    a.annotate(f"After: {r10.post * sc:.1f} bp".replace("-", "\u2212"), (10, r10.post * sc), xytext=(10, 30),
+               textcoords="offset points", fontsize=8.5, color=BLUE, fontweight="bold",
+               arrowprops={"arrowstyle": "-", "color": BLUE, "lw": 0.8})
+    a.set_ylim(-42, 15)
+    a.legend(loc="upper left", fontsize=8.5, ncol=2)
+
+    # (b) change in the 10-day response at the Act, at Senate passage and at a placebo date
+    fig.text(0.04, 0.418, "b  Change in the day-10 response at each break date",
+             fontsize=10, fontweight="bold", va="top")
+    rows = [
+        ("GENIUS Act signed\n18 Jul 2025", rb["Baseline (primary spec)"], BLUE, "o"),
+        ("Senate passage\n17 Jun 2025", rb["Alternative break 2025-06-17 (Senate)"], BLUE, "o"),
+        ("Placebo, no legislation\n18 Jul 2024", rb["Placebo break 2024-07-18 (data to 2025-06-16)"], ACCENT, "s"),
+    ]
+    b = fig.add_axes((0.36, 0.215, 0.5, 0.165))
+    for i, (lab, r, col, mk) in enumerate(rows):
+        y = len(rows) - 1 - i
+        m, half = r["diff"] * sc, Z90 * r["diff_se"] * sc
+        b.plot([m - half, m + half], [y, y], color=col, lw=2.0, solid_capstyle="round")
+        b.plot(m, y, marker=mk, ms=7, color=col, mec=SURFACE, mew=1.5)
+        p = "p < 0.01" if r["diff_p"] < 0.005 else f"p = {r['diff_p']:.2f}"
+        b.annotate(f"{m:+.1f} bp ({p})".replace("-", "\u2212"), (m + half, y), xytext=(5, 0), textcoords="offset points",
+                   va="center", fontsize=8.5, color=col, fontweight="bold")
+    b.axvline(0, color=INK2, lw=0.8)
+    b.set_yticks(range(len(rows)), [r[0] for r in rows][::-1], fontsize=8.5)
+    b.set_ylim(-0.6, len(rows) - 0.4)
+    b.set_xlim(-12, 50)
+    b.grid(axis="y", visible=False)
+    b.set_xlabel("After minus before (bp per USD 10 bn, 90% CI)", fontsize=9)
+    fig.text(0.04, 0.07, "A placebo date with no legislation shows a larger, significant break than the Act:\n"
+             "controls-only estimates of this channel are unstable over time.",
+             fontsize=8.6, fontweight="bold", color=INK, va="bottom", linespacing=1.3)
+    fig.text(0.04, 0.012, "Associations, not causal effects. Reserve rules bind from Jan 2027. Data: DefiLlama, FRED, Binance.\n"
+             "Paper, code, data: github.com/thanatchon36/stablecoin-tbills-genius-act",
+             fontsize=7.4, color=INK2, va="bottom", linespacing=1.35)
+    save(fig, cfg, "fig_linkedin", dpi=200)
 
 
 def fig2_term_structure(cfg: dict[str, Any], res: dict[str, Any]) -> None:
@@ -230,6 +283,6 @@ def make_all(cfg: dict[str, Any], panel: pd.DataFrame) -> None:
     fig3_data_overview(cfg, panel)
     res = json.loads((ROOT / cfg["paths"]["tables"] / "lp_results.json").read_text())
     fig1_irf_pre_post(cfg, res)
-    fig1_irf_pre_post(cfg, res, linkedin=True)
+    fig_linkedin(cfg, res)
     fig2_term_structure(cfg, res)
     fig4_asymmetry(cfg, res)
