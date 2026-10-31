@@ -193,7 +193,7 @@ def fig4_asymmetry(cfg: dict[str, Any], res: dict[str, Any]) -> None:
     a = pd.DataFrame(res["asymmetry"])
     od = res["outflow_days"]
     fig, axes = plt.subplots(2, 2, figsize=(8, 6.2), sharex=True)
-    fig.subplots_adjust(left=0.09, right=0.97, top=0.86, bottom=0.2, hspace=0.32, wspace=0.18)
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.83, bottom=0.2, hspace=0.32, wspace=0.18)
     panels = [(0, 0, "pos_pre", sc, PRE, PRE_BAND, "Inflow, pre-enactment"),
               (0, 1, "pos_post", sc, BLUE, "#86b6ef", "Inflow, post-enactment"),
               (1, 0, "neg_pre", -sc, PRE, PRE_BAND, "Outflow, pre-enactment"),
