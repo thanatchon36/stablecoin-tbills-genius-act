@@ -18,7 +18,7 @@ Limits: these are associations, not causal estimates. The post sample is short (
 
 Built on Ahmed & Aldasoro (2025), "Stablecoins and safe asset prices", BIS WP 1270. Theirs is the causal design; this is a replication-in-spirit.
 
-Code + data: https://github.com/<my-handle>/stablecoin-tbills-genius-act
+Code + data: https://github.com/thanatchon36/stablecoin-tbills-genius-act
 
 #stablecoins #Treasuries #BIS #monetarypolicy
 

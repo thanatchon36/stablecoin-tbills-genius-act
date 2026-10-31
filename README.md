@@ -128,7 +128,7 @@ make all        # build -> tests -> estimate -> figures -> tables (uses committe
 make refresh    # re-download all sources (new vintage) and rebuild
 ```
 
-Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`. The running log is in [docs/FINDINGS.md](docs/FINDINGS.md). `src/utils.py` (config, logging, cached HTTP) is added to the planned layout. The CoinGecko and Treasury fallback sources are configured but were not needed and are not implemented. Repository: https://github.com/<my-handle>/stablecoin-tbills-genius-act
+Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`. The running log is in [docs/FINDINGS.md](docs/FINDINGS.md). `src/utils.py` (config, logging, cached HTTP) is added to the planned layout. The CoinGecko and Treasury fallback sources are configured but were not needed and are not implemented. Repository: https://github.com/thanatchon36/stablecoin-tbills-genius-act
 
 ## 9. References
 

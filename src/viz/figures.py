@@ -145,7 +145,7 @@ def fig1_irf_pre_post(cfg: dict[str, Any], res: dict[str, Any], linkedin: bool =
         ax.xaxis.label.set_size(11)
         ax.yaxis.label.set_size(11)
         footer(fig, "Local projections with controls (not IV); 68% and 90% Newey–West bands. Association, not "
-                    "causation. Code + data: github.com/<my-handle>/stablecoin-tbills-genius-act", size=8, width=95)
+                    "causation. Code + data: github.com/thanatchon36/stablecoin-tbills-genius-act", size=8, width=95)
         save(fig, cfg, "fig_linkedin", dpi=200)
     else:
         fig.suptitle("3-month T-bill response to stablecoin inflows, before vs after the GENIUS Act",

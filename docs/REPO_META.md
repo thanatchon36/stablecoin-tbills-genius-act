@@ -2,7 +2,7 @@
 
 **Name:** `stablecoin-tbills-genius-act`
 
-**URL:** https://github.com/<my-handle>/stablecoin-tbills-genius-act
+**URL:** https://github.com/thanatchon36/stablecoin-tbills-genius-act
 
 **About (description):**
 
