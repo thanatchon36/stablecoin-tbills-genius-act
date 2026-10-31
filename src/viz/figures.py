@@ -148,67 +148,133 @@ ACCENT = "#b2182b"
 
 
 def fig_linkedin(cfg: dict[str, Any], res: dict[str, Any]) -> None:
-    """4:5 social card (1200 x 1500 px): (a) pre/post IRF, (b) change at the Act vs a placebo date."""
-    sc = cfg["lp"]["scale_bn"]
+    """4:5 social card (1200 x 1500 px): one panel per pre-registered hypothesis, plus the placebo break."""
+    sc, asc = cfg["lp"]["scale_bn"], cfg["lp"]["anchor_scale_bn"]
     d = pd.DataFrame(res["primary"])
     r10 = d.set_index("h").loc[10]
+    term = pd.DataFrame([pd.DataFrame(v).set_index("h").loc[10].rename(k) for k, v in res["term"].items()])
+    a10 = pd.DataFrame(res["asymmetry"]).set_index("h").loc[10]
     rb = res["robustness"]
-    fig = plt.figure(figsize=(6, 7.5))
-    fig.text(0.04, 0.965, "Did the GENIUS Act strengthen the link between\nstablecoin inflows and T-bill yields? Not so far.",
-             ha="left", va="top", fontsize=14.5, fontweight="bold", linespacing=1.15)
-    fig.text(0.04, 0.887, "3-month US Treasury bill · per USD 10 bn five-day inflow into fiat-backed\n"
-             "stablecoins · daily, Jan 2021 to Oct 2026 · pre-registered local projections",
-             ha="left", va="top", fontsize=8.6, color=INK2, linespacing=1.35)
+    gen, sen, pl = (rb["Baseline (primary spec)"], rb["Alternative break 2025-06-17 (Senate)"],
+                    rb["Placebo break 2024-07-18 (data to 2025-06-16)"])
 
-    # (a) impulse responses
-    fig.text(0.04, 0.815, "a  Yield response after the inflow", fontsize=10, fontweight="bold", va="top")
-    a = fig.add_axes((0.12, 0.505, 0.83, 0.285))
+    def bp(x: float, sign: bool = False) -> str:
+        return (f"{x:+.1f}" if sign else f"{x:.1f}").replace("-", "−")
+
+    def pv(p: float) -> str:
+        return "p < 0.01" if p < 0.005 else f"p = {p:.2f}"
+
+    fig = plt.figure(figsize=(6, 7.5))
+    fig.text(0.04, 0.976, "Did the GENIUS Act strengthen the stablecoin–T-bill\nchannel? Three pre-registered tests say no.",
+             ha="left", va="top", fontsize=13.2, fontweight="bold", linespacing=1.15)
+    fig.text(0.04, 0.91, "3-month US T-bill · fiat-backed USD stablecoins · daily, Jan 2021 to Oct 2026\n"
+             "Local projections, 90% Newey–West intervals · grey = before the Act, blue = after",
+             ha="left", va="top", fontsize=8.2, color=INK2, linespacing=1.4)
+
+    def header(x: float, y: float, tag: str, question: str, verdict: str) -> None:
+        fig.text(x, y, f"{tag}   {question}", fontsize=9.2, fontweight="bold", va="top")
+        fig.text(x, y - 0.0215, verdict, fontsize=8.2, color=INK, va="top")
+
+    lx, rx, w, h = 0.105, 0.615, 0.365, 0.215
+    y1, y2 = 0.585, 0.26
+
+    # (a) H1: pre/post impulse responses of the 3-month bill
+    header(0.04, y1 + h + 0.05, "H1", "Stronger response after the Act?",
+           f"No: {bp(r10.pre * sc)} → {bp(r10.post * sc)} bp at day 10 ({pv(r10.diff_p)})")
+    a = fig.add_axes((lx, y1, w, h))
     _irf(a, d, "pre", "pre_se", sc, PRE, PRE_BAND, "Before the Act")
     _irf(a, d, "post", "post_se", sc, BLUE, "#86b6ef", "After the Act")
     _zero(a)
     a.axvline(10, color=INK2, lw=0.7, ls=(0, (1, 2)))
     a.set_xlim(0, 20)
     a.set_xticks(range(0, 21, 5))
-    a.set_xlabel("Business days after the flow", fontsize=9)
-    a.set_ylabel("Change in yield (bp)", fontsize=9)
-    a.annotate(f"Before: {r10.pre * sc:.1f} bp at day 10".replace("-", "\u2212"), (10, r10.pre * sc),
-               xytext=(10.4, -36), textcoords="data", fontsize=8.5, color=PRE, fontweight="bold",
-               arrowprops={"arrowstyle": "-", "color": PRE, "lw": 0.8})
-    a.annotate(f"After: {r10.post * sc:.1f} bp".replace("-", "\u2212"), (10, r10.post * sc), xytext=(10, 30),
-               textcoords="offset points", fontsize=8.5, color=BLUE, fontweight="bold",
-               arrowprops={"arrowstyle": "-", "color": BLUE, "lw": 0.8})
-    a.set_ylim(-42, 15)
-    a.legend(loc="upper left", fontsize=8.5, ncol=2)
+    a.set_ylim(-42, 17)
+    a.set_xlabel("Business days after a USD 10 bn five-day inflow", fontsize=7.8)
+    a.set_ylabel("Change in yield (bp)", fontsize=7.8)
+    a.tick_params(labelsize=7.5)
+    for est, col, ytext in (("post", BLUE, 5.5), ("pre", PRE, -35)):
+        a.annotate(f"{bp(r10[est] * sc)} bp", (10, r10[est] * sc), xytext=(10.7, ytext), textcoords="data",
+                   fontsize=8, fontweight="bold", color=INK, va="center",
+                   arrowprops={"arrowstyle": "-", "color": col, "lw": 0.8, "shrinkB": 2})
+    a.legend(loc="upper left", fontsize=7.5, ncol=2, handlelength=1.6, columnspacing=1.0, borderaxespad=0.3)
 
-    # (b) change in the 10-day response at the Act, at Senate passage and at a placebo date
-    fig.text(0.04, 0.418, "b  Change in the day-10 response at each break date",
-             fontsize=10, fontweight="bold", va="top")
-    rows = [
-        ("GENIUS Act signed\n18 Jul 2025", rb["Baseline (primary spec)"], BLUE, "o"),
-        ("Senate passage\n17 Jun 2025", rb["Alternative break 2025-06-17 (Senate)"], BLUE, "o"),
-        ("Placebo, no legislation\n18 Jul 2024", rb["Placebo break 2024-07-18 (data to 2025-06-16)"], ACCENT, "s"),
-    ]
-    b = fig.add_axes((0.36, 0.215, 0.5, 0.165))
+    # (b) H2: day-10 response by tenor
+    header(0.545, y1 + h + 0.05, "H2", "Shift to ≤ 93-day maturities?",
+           "No: the short-end tilt predates the Act")
+    b = fig.add_axes((rx, y1, w, h))
+    xs = range(len(term))
+    for est, se, col, dx in (("pre", "pre_se", PRE, -0.15), ("post", "post_se", BLUE, 0.15)):
+        b.errorbar([i + dx for i in xs], term[est] * sc, yerr=Z90 * term[se] * sc, fmt="o", color=col, ms=4.2,
+                   capsize=2.2, lw=1.3)
+    _zero(b)
+    b.set_ylim(-34, 26)
+    b.axvspan(-0.5, 1.5, color="#eef4fc", zorder=0, lw=0)
+    b.text(0.5, 25, "≤ 93 days:\neligible reserves", ha="center", va="top", fontsize=6.8, color=INK2,
+           linespacing=1.2)
+    b.set_xticks(list(xs), [TENORS[i] for i in term.index], fontsize=7)
+    b.set_xlim(-0.5, len(term) - 0.5)
+    b.set_ylabel("bp per USD 10 bn, day 10", fontsize=7.8)
+    b.tick_params(axis="y", labelsize=7.5)
+    b.grid(axis="x", visible=False)
+
+    # (c) H3: inflow vs outflow at day 10, per USD 3.5 bn (outflow sign flipped: + means yields rise)
+    header(0.04, y2 + h + 0.05, "H3", "Do outflows still dominate?",
+           f"Not after the Act: {bp(-a10.neg_pre * asc, True)} bp before, {bp(-a10.neg_post * asc, True)} after")
+    c = fig.add_axes((lx, y2, w, h))
+    pts = ((-0.15, a10.pos_pre, a10.pos_pre_se, PRE, 1), (0.15, a10.pos_post, a10.pos_post_se, BLUE, 1),
+           (0.85, a10.neg_pre, a10.neg_pre_se, PRE, -1), (1.15, a10.neg_post, a10.neg_post_se, BLUE, -1))
+    for x_, m, s_, col, sgn in pts:
+        v = sgn * m * asc
+        c.errorbar(x_, v, yerr=Z90 * s_ * asc, fmt="o", color=col, ms=4.2, capsize=2.2, lw=1.3)
+        left = x_ in (-0.15, 0.85)
+        c.annotate(bp(v, True), (x_, v), xytext=(-7 if left else 7, 0), textcoords="offset points",
+                   ha="right" if left else "left", va="center", fontsize=7.2, color=INK2)
+    _zero(c)
+    c.set_xticks([0, 1], ["Inflow", "Outflow"], fontsize=7.5)
+    c.set_xlim(-0.5, 1.5)
+    c.set_ylim(-13, 34)
+    c.set_ylabel("bp per USD 3.5 bn, day 10", fontsize=7.8)
+    c.tick_params(axis="y", labelsize=7.5)
+    c.grid(axis="x", visible=False)
+    c.text(-0.45, 33, "Outflow sign flipped:\n+ means yields rise", ha="left", va="top", fontsize=6.8, color=INK2,
+           linespacing=1.2)
+
+    # (d) change in the day-10 response at three break dates
+    header(0.545, y2 + h + 0.05, "Placebo", "Break with no legislation",
+           f"{bp(pl['diff'] * sc, True)} bp, {pv(pl['diff_p'])} (GENIUS Act: {bp(gen['diff'] * sc, True)} bp)")
+    dd = fig.add_axes((0.545, y2, 0.43, h))
+    rows = (("GENIUS Act signed, 18 Jul 2025", gen, BLUE, "o"), ("Senate passage, 17 Jun 2025", sen, BLUE, "o"),
+            ("Placebo: no legislation, 18 Jul 2024", pl, ACCENT, "s"))
     for i, (lab, r, col, mk) in enumerate(rows):
         y = len(rows) - 1 - i
         m, half = r["diff"] * sc, Z90 * r["diff_se"] * sc
-        b.plot([m - half, m + half], [y, y], color=col, lw=2.0, solid_capstyle="round")
-        b.plot(m, y, marker=mk, ms=7, color=col, mec=SURFACE, mew=1.5)
-        p = "p < 0.01" if r["diff_p"] < 0.005 else f"p = {r['diff_p']:.2f}"
-        b.annotate(f"{m:+.1f} bp ({p})".replace("-", "\u2212"), (m + half, y), xytext=(5, 0), textcoords="offset points",
-                   va="center", fontsize=8.5, color=col, fontweight="bold")
-    b.axvline(0, color=INK2, lw=0.8)
-    b.set_yticks(range(len(rows)), [r[0] for r in rows][::-1], fontsize=8.5)
-    b.set_ylim(-0.6, len(rows) - 0.4)
-    b.set_xlim(-12, 50)
-    b.grid(axis="y", visible=False)
-    b.set_xlabel("After minus before (bp per USD 10 bn, 90% CI)", fontsize=9)
-    fig.text(0.04, 0.07, "A placebo date with no legislation shows a larger, significant break than the Act:\n"
-             "controls-only estimates of this channel are unstable over time.",
-             fontsize=8.6, fontweight="bold", color=INK, va="bottom", linespacing=1.3)
-    fig.text(0.04, 0.012, "Associations, not causal effects. Reserve rules bind from Jan 2027. Data: DefiLlama, FRED, Binance.\n"
-             "Paper, code, data: github.com/thanatchon36/stablecoin-tbills-genius-act",
-             fontsize=7.4, color=INK2, va="bottom", linespacing=1.35)
+        dd.plot([m - half, m + half], [y, y], color=col, lw=1.8, solid_capstyle="round")
+        dd.plot(m, y, marker=mk, ms=6, color=col, mec=SURFACE, mew=1.2)
+        dd.text(-9, y + 0.4, lab, fontsize=7.4, color=INK2, va="bottom",
+                bbox={"facecolor": SURFACE, "edgecolor": "none", "pad": 1.5})
+        dd.text(m + half + 1.5, y, f"{bp(m, True)} bp, {pv(r['diff_p'])}", fontsize=7.8, fontweight="bold",
+                color=INK, va="center")
+    dd.axvline(0, color=INK2, lw=0.8)
+    dd.set_xlim(-10, 76)
+    dd.set_ylim(-0.55, len(rows) - 1 + 0.95)
+    dd.set_yticks([])
+    dd.spines["left"].set_visible(False)
+    dd.grid(axis="y", visible=False)
+    dd.tick_params(labelsize=7.5)
+    dd.set_xlabel("Δ day-10 response (bp per USD 10 bn, 90% CI)", fontsize=7.8)
+
+    ratio = pl["diff"] / gen["diff"]
+    fig.text(0.04, 0.178, textwrap.fill(
+        f"Placebo break = {ratio:.1f} × GENIUS break. The controls-only association shifts between sub-periods "
+        "with no legislation, so no break can be attributed to the Act.", 82),
+        fontsize=8.3, fontweight="bold", va="top", linespacing=1.3)
+    mde = 2.8 * r10.diff_se * sc
+    fig.text(0.04, 0.012, textwrap.fill(
+        f"Associations, not causal effects. Reserve rules bind from 18 Jan 2027; with {int(r10.N_post)} post-Act "
+        f"observations the minimum detectable change is about {mde:.0f} bp. Replication-in-spirit of Ahmed & Aldasoro "
+        "(2025), BIS WP 1270. Data: DefiLlama, FRED (St. Louis Fed), Binance; author's calculations. Paper, code, data: "
+        "github.com/thanatchon36/stablecoin-tbills-genius-act", 104),
+        fontsize=7.2, color=INK2, va="bottom", linespacing=1.35)
     save(fig, cfg, "fig_linkedin", dpi=200)
 
 
