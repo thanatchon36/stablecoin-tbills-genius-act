@@ -1,8 +1,50 @@
-# Stablecoin flows and T-bill yields after the GENIUS Act
+<p align="center"><img src="docs/assets/logo.svg" alt="stablecoin-tbills-genius-act logo" width="120"></p>
 
-**Takeaway:** In the 15 months after the GENIUS Act became law, stablecoin inflows have *not* been associated with a larger fall in 3-month T-bill yields than before. The point estimate is about half the pre-enactment one, the difference is not statistically significant, and a placebo break a year earlier is larger still.
+<h1 align="center">Stablecoin flows and T-bill yields after the GENIUS Act</h1>
 
-*A replication-in-spirit and extension of Ahmed & Aldasoro (2025, BIS Working Paper No 1270). Open data, pre-registered local projections, fully reproducible.*
+[![CI](https://github.com/thanatchon36/stablecoin-tbills-genius-act/actions/workflows/ci.yml/badge.svg)](https://github.com/thanatchon36/stablecoin-tbills-genius-act/actions/workflows/ci.yml)
+[![Paper](https://img.shields.io/badge/paper-PDF-b2182b)](https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf)
+[![Pre-registered](https://img.shields.io/badge/pre--registered-PAP-2f5f9e)](docs/PAP.md)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](requirements.txt)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
+📄 **[Download the paper (PDF)](https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf)** ·
+📝 **[Pre-analysis plan](docs/PAP.md)** ·
+📒 **[Research log](docs/FINDINGS.md)** ·
+🇹🇭 **[สรุปภาษาไทย](docs/SUMMARY_TH.md)**
+
+**Do stablecoin flows move US Treasury-bill yields differently after the GENIUS Act?** The Act (Public Law 119-27,
+signed 18 July 2025) restricts the Treasury reserves of US payment-stablecoin issuers to securities maturing within
+93 days. This repository tests whether the flow–yield association documented by Ahmed & Aldasoro (2025, BIS Working
+Paper No 1270) changed after enactment. It is a replication-in-spirit and extension, built on open data and
+pre-registered local projections. Every number in the paper is regenerated from the raw data by `make all`.
+
+**Takeaway:** in the 15 months after the GENIUS Act became law, stablecoin inflows have *not* been associated with a
+larger fall in 3-month T-bill yields than before.
+
+- **Primary (H1):** −10.9 bp before vs −5.6 bp after, per USD 10 bn five-day inflow at 10 business days. The
+  difference, +5.3 bp (p = 0.30), has the opposite sign to the hypothesis.
+- **Term structure (H2):** the short-end concentration (4-week −14.8 bp, 2-year ≈ 0) was already there before the Act.
+- **Asymmetry (H3):** before enactment, outflows are associated with much larger moves than inflows. After
+  enactment the asymmetry is absent.
+- **Caveat:** a placebo break in July 2024 is larger and significant (+23.1 bp, p < 0.01). The reserve rules bind only
+  from 18 January 2027, and the design has little power (minimum detectable change ≈ 15 bp).
+
+<p align="center"><img src="paper/figures/fig_irf.png" alt="Response of the 3-month T-bill yield to a USD 10 bn stablecoin inflow before (grey, dashed) and after (blue) the GENIUS Act, h = 0 to 20 business days, with 68% and 90% bands" width="560"></p>
+
+## Research paper
+
+*Stablecoin Flows and Treasury-Bill Yields after the GENIUS Act: A Pre-Registered Replication-in-Spirit*
+(7 pages, IEEE two-column format) is in [`paper/`](paper/), and the PDF is [`paper/paper.pdf`](paper/paper.pdf).
+- **Generated content:** every number in the text is a LaTeX macro written by
+  [`src/viz/paper_tex.py`](src/viz/paper_tex.py) from `output/tables/lp_results.json`. Every table is generated, and
+  every figure is drawn at print size by [`src/viz/paper_figures.py`](src/viz/paper_figures.py).
+- **Pre-registration:** the hypotheses, specification, robustness list and decision rules were committed in
+  [`docs/PAP.md`](docs/PAP.md) before any yield data were downloaded.
+- **Log and deviations:** the timestamped log is in [`docs/FINDINGS.md`](docs/FINDINGS.md), and deviations from the
+  plan are listed in the paper's Appendix C.
+
+The research note below is the short version of the paper.
 
 ---
 
@@ -114,7 +156,7 @@ Table 2 ([output/tables/table2_robustness.md](output/tables/table2_robustness.md
 - **What differs.**
   - We use a much smaller control set and no instrument.
   - Our pre-enactment estimate (−3.8 bp per USD 3.5 bn) resembles their June 2026 *IV* estimate (about −4 bp at 10 days). It is far larger than their *controls-only* estimate (< 1 bp, insignificant), which suggests our β still contains confounding that their lead-yield and policy-shock controls remove.
-  - The headline numbers quoted in the BIS report (2–2.5 bp; outflows two to three times inflows) are from the May 2025 version. The June 2026 revision reports 0.71 bp on impact and about 4 bp within 10 days, and drops the asymmetry result.
+  - The figures quoted in the BIS report (2.5–5 bp per USD 3.5 bn, up to three times larger in redemption episodes) predate the June 2026 revision and draw on the May 2025 version (2-s.d. inflow: −2 to −2.5 bp within 10 days; outflows two to three times larger). The June 2026 revision reports 0.71 bp on impact and about 4 bp within 10 days, and drops the asymmetry result.
 - **What we add.**
   - A legal-event break rather than a sector-scale proxy (they use a post-2024 dummy and find a *stronger* channel; our controls-only placebo at July 2024 points the other way).
   - A term-structure test motivated by the 93-day rule.
@@ -123,12 +165,26 @@ Table 2 ([output/tables/table2_robustness.md](output/tables/table2_robustness.md
 ## 8. Reproduce
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-make all        # build -> tests -> estimate -> figures -> tables (uses committed raw data)
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # Python >= 3.11, pinned versions
+make all        # build -> tests -> estimate -> figures -> tables -> paper assets (offline, from committed raw data)
+make paper      # build paper/paper.pdf with a pinned Tectonic (downloaded with a SHA-256 check on first run)
 make refresh    # re-download all sources (new vintage) and rebuild
 ```
 
-Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`. The running log is in [docs/FINDINGS.md](docs/FINDINGS.md). `src/utils.py` (config, logging, cached HTTP) is added to the planned layout. The CoinGecko and Treasury fallback sources are configured but were not needed and are not implemented. Repository: https://github.com/thanatchon36/stablecoin-tbills-genius-act
+- **Run time and determinism:** `make all` runs offline in under a minute, and every output is byte-identical across
+  runs. CI rebuilds everything on each push and fails if any number in the paper or tables changes.
+- **Data vintage:** 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`.
+- **Additions to the planned layout:** `src/utils.py` (config, logging, cached HTTP) and the `paper/` pipeline.
+- **Fallback sources:** CoinGecko and Treasury are configured but were not needed, so they are not implemented.
+
+| Path | Contents |
+|---|---|
+| `src/data/` | Fetchers (DefiLlama, FRED, Binance) and panel construction |
+| `src/analysis/` | Local projections (`lp.py`) and every pre-registered specification (`robustness.py`) |
+| `src/viz/` | Note figures/tables; paper figures (`paper_figures.py`) and LaTeX numbers/tables (`paper_tex.py`) |
+| `tests/` | Data-sanity tests (dates, coverage, NaNs, levels vs the anchor paper) |
+| `paper/` | LaTeX source, generated `numbers.tex`, `tables/`, `figures/`, and `paper.pdf` |
+| `docs/` | Pre-analysis plan, research log, LinkedIn draft, Thai summary, repository metadata |
 
 ## 9. References
 
@@ -138,5 +194,24 @@ Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are time
 - Newey, W. K. and K. D. West (1987), "A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix", *Econometrica* 55(3), 703–708.
 - Guiding and Establishing National Innovation for U.S. Stablecoins (GENIUS) Act, Public Law 119-27, 139 Stat. 419, 18 July 2025.
 - Office of the Comptroller of the Currency (2026), Bulletin 2026-50, final rule implementing the GENIUS Act, 21 October 2026.
+
+## Citation
+
+See [`CITATION.cff`](CITATION.cff), or:
+
+```bibtex
+@techreport{chongmankhong2026genius,
+  author      = {Chongmankhong, Thanatchon},
+  title       = {Stablecoin Flows and Treasury-Bill Yields after the {GENIUS} Act: A Pre-Registered Replication-in-Spirit},
+  year        = {2026},
+  type        = {Working paper},
+  url         = {https://github.com/thanatchon36/stablecoin-tbills-genius-act}
+}
+```
+
+## License
+
+Code and text: [Apache-2.0](LICENSE). The raw data in `data/raw/` come from DefiLlama, FRED (Federal Reserve Bank of
+St. Louis) and Binance, and remain subject to their providers' terms.
 
 *Views and errors are the author's own. This is an independent research note, not investment advice.*

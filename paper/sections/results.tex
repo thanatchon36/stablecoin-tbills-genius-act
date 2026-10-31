@@ -1,0 +1,78 @@
+\section{Results}\label{sec:results}
+
+\subsection{Primary specification (H1)}
+
+Before enactment, a USD~10\,bn five-day inflow is associated with a 3-month yield \bPre{}\,bp lower after ten business days (s.e.~\bPreSE{}; 90\% CI \bPreLo{} to \bPreHi{}). After enactment the estimate is \bPost{}\,bp (s.e.~\bPostSE{}; 90\% CI \bPostLo{} to \bPostHi{}; \bPostP{}). The difference is $\delta_{10}=\bDiff{}$\,bp (s.e.~\bDiffSE{}, \bDiffP{}). It is not statistically distinguishable from zero, and its sign is opposite to H1, which predicts $\delta_{10}<0$ (Table~\ref{tab:primary}). At the scale of~\cite{ahmed2025} the estimates are \bAnchorPre{}\,bp before and \bAnchorPost{}\,bp after enactment per USD~3.5\,bn; per standard deviation of~$F_t$ they are \bSDPre{} and \bSDPost{}\,bp. Dropping the same-day controls changes nothing material ($\delta_{10}=\bLagsDiff{}$\,bp, \bLagsDiffP{}). \textbf{H1 is not supported.}
+
+Fig.~\ref{fig:irf} shows the full responses. Before enactment the response builds steadily, reaching \bTwPre{}\,bp at $h=20$. After enactment it bottoms out at \postTrough{}\,bp at $h=\postTroughH{}$ and then fades towards zero. The gap widens with the horizon ($\delta_{20}=\bTwDiff{}$\,bp, \bTwDiffP{}). No single horizon is significant at the 5\% level, and adjacent horizons are highly correlated by construction.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_irf.pdf}
+\caption{Response of the 3-month bill yield to a USD~10\,bn five-day stablecoin inflow, before and after the GENIUS Act (Eq.~\ref{eq:lp}). Lines: point estimates; shaded: 68\% and 90\% Newey--West bands. Dotted line: the pre-registered horizon $h=10$.}
+\label{fig:irf}
+\end{figure}
+
+\begin{table*}[!t]
+\centering
+\caption{Primary local projection: 3-month Treasury bill (pre-registered)}
+\label{tab:primary}
+\footnotesize
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/primary.tex}
+\end{adjustbox}
+
+\vspace{2pt}
+\parbox{\textwidth}{\footnotesize Dependent variable: $y_{t+h}-y_{t-1}$ in bp. Coefficients scaled to the stated flow size; Newey--West standard errors ($h+1$ lags) in parentheses; two-sided $p$-values. $N_{post}$ falls with $h$ because leads run to the end of the sample.}
+\end{table*}
+
+\subsection{Term structure (H2)}
+
+Before enactment the ten-day response shrinks with maturity: \tFourWPre{}\,bp at 4~weeks, \tThreeMPre{} at 3~months, \tSixMPre{} at 6~months, \tOneYPre{} at 1~year and \tTwoYPre{} at 2~years (Fig.~\ref{fig:term}, Table~\ref{tab:term}). Only the 3-month estimate is significant at 5\% (\tThreeMPreP{}; 4-week \tFourWPreP{}). The gradient is consistent with preferred-habitat demand~\cite{vayanos2021}, but it was already present before the Act. After enactment every tenor is smaller in absolute value and imprecise, and no tenor's $\delta_{10}$ is significant (all $p\geq\termDiffMinP{}$). \textbf{H2 is not supported.}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_term.pdf}
+\caption{Ten-day response $\beta_{10}$ by tenor, per USD~10\,bn five-day inflow, with 90\% Newey--West intervals. Shaded: maturities eligible as reserves under \S4(a)(1)(A)(iii). Bills are secondary-market yields; 1- and 2-year yields are constant-maturity.}
+\label{fig:term}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Term structure of $\beta_{10}$ (bp per USD 10\,bn, s.e.)}
+\label{tab:term}
+\footnotesize
+\begin{adjustbox}{max width=\columnwidth}
+\input{tables/term.tex}
+\end{adjustbox}
+\end{table}
+
+\subsection{Asymmetry (H3)}
+
+Before enactment, outflows are associated with much larger yield moves than inflows (Fig.~\ref{fig:asym}, Table~\ref{tab:asym}). Per USD~3.5\,bn at $h=10$, an inflow is associated with \aInPre{}\,bp (\aInPreP{}) and an outflow with \aOutPre{}\,bp (\aOutPreP{}); equal slopes are rejected at \aEqPreP{}. This matches the direction of the first version of~\cite{ahmed2025}. The magnitude, however, is implausible: \aOutPreTw{}\,bp at $h=20$. Of the \outPre{} pre-enactment outflow days, \outPreHike{} fall in 2022--23, when the Federal Reserve was raising rates. Stablecoins pay no interest, so rising rates plausibly caused both the redemptions and the rise in yields. We read this asymmetry as rate-driven redemption, not fire-sale price impact.
+
+After enactment an inflow is associated with \aInPost{}\,bp (\aInPostP{}) and an outflow with \aOutPost{}\,bp (\aOutPostP{}): outflows are associated with \emph{lower}, not higher, yields. The equal-slope test rejects (\aEqPostP{}) because the signs differ, not because outflows dominate. \textbf{H3 is not supported after enactment.}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_asym.pdf}
+\caption{Response of the 3-month bill yield to a USD~3.5\,bn five-day inflow (a,~b) and outflow (c,~d), before and after enactment. A positive outflow response means outflows raise yields. Rows share a vertical scale; 68\% and 90\% Newey--West bands.}
+\label{fig:asym}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Asymmetry: response to a USD 3.5\,bn flow (bp, $p$)}
+\label{tab:asym}
+\footnotesize
+\begin{adjustbox}{max width=\columnwidth}
+\input{tables/asymmetry.tex}
+\end{adjustbox}
+
+\vspace{2pt}
+\parbox{\columnwidth}{\footnotesize Inflow $=3.5\,\beta^+$; outflow $=-3.5\,\beta^-$. Last column: Wald test of $\beta^-=\beta^+$ within the regime.}
+\end{table}
+
+\subsection{Bill--policy-rate spread}
+
+For the 3-month bill yield minus the effective federal funds rate, $\delta_{10}=\spDiff{}$\,bp (\spDiffP{}). Neither regime is significant (pre \spPre{}\,bp, \spPreP{}; post \spPost{}\,bp, \spPostP{}). The association with the bill yield is therefore not visible in the spread. This is consistent with the bill-yield association reflecting policy-rate expectations rather than a bill-specific scarcity premium, which would also explain why the controls-only estimate is larger than the instrumented one (Section~\ref{sec:discussion}).

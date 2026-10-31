@@ -1,0 +1,27 @@
+\section{Robustness, Placebo and Power}\label{sec:robustness}
+
+\paragraph*{Pre-registered checks} Table~\ref{tab:robust} and Fig.~\ref{fig:robust} report the closed list of ten robustness checks next to the baseline: a break at Senate passage; a placebo break; dropping $\pm$10 business days around the Terra, FTX and SVB episodes; USDT-only and USDC-only flows; the all-USD-pegged aggregate; the one-day timing shift; flow windows of one and ten days; and lags-only controls. Across the \rbN{} non-placebo rows $\delta_{10}$ is never significant (smallest \rbMinP{}) and is positive in \rbNPos{} of them. The exception is USDT-only flows, where the post-enactment response is larger (\rbUSDTPost{} against \rbUSDTPre{}\,bp; $\delta_{10}=\rbUSDTDiff{}$, \rbUSDTDiffP{}). The post-enactment response is individually significant only with the all-USD-pegged aggregate (\rbAllPost{}\,bp, \rbAllPostP{}) and the ten-day window (\rbKtenPost{}\,bp, \rbKtenPostP{}).
+
+\paragraph*{Placebo} A break on 18~July 2024, estimated on data ending before Senate passage, gives $\delta_{10}=\rbPlDiff{}$\,bp (\rbPlDiffP{}), with a ``post'' response of \rbPlPost{}\,bp. The flow--yield association thus shifts by more than the GENIUS-Act difference between two sub-periods separated by no legislative event. Even a significant $\delta_{10}$ at enactment could not have been attributed to the Act on this evidence, and the instability is itself a finding: the controls-only association is not a stable structural parameter.
+
+\paragraph*{Power} With \nPostTen{} post-enactment observations at $h=10$, the standard error of $\delta_{10}$ is \bDiffSE{}\,bp. The minimum detectable difference at 80\% power and a two-sided 5\% test is therefore about $2.8\times\bDiffSE{}\approx\mde{}$\,bp per USD~10\,bn, roughly \mdeRatio{} times the entire pre-enactment estimate. A doubling of the response would have been hard to detect. The null is weak evidence of no change.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_robust.pdf}
+\caption{Pre-registered robustness: the change at enactment $\delta_{10}$ (post minus pre, bp per USD~10\,bn of $k$-day flow) with 90\% Newey--West intervals. Diamond: baseline. Square: placebo break on 18~July 2024, estimated on data ending 16~June 2025.}
+\label{fig:robust}
+\end{figure}
+
+\begin{table*}[!t]
+\centering
+\caption{Robustness (pre-registered): 3-month bill, $h=10$, estimate (s.e.)}
+\label{tab:robust}
+\footnotesize
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/robustness.tex}
+\end{adjustbox}
+
+\vspace{2pt}
+\parbox{\textwidth}{\footnotesize ``Pre'' and ``post'' are relative to each row's break date; in the placebo row ``post'' is 18~July 2024 to 16~June 2025 and the GENIUS period is outside the sample. USDT- and USDC-only rows use that coin's own flows; the $k$ rows change the flow window, so ``per USD 10\,bn'' refers to a $k$-day flow.}
+\end{table*}

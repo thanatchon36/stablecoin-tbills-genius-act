@@ -1,0 +1,11 @@
+\section{Limitations}\label{sec:limits}
+
+\paragraph*{Endogeneity} Stablecoin flows respond to interest rates. The coins pay no yield, and the BIS documents larger redemptions after monetary tightening~\cite{bis2025aer}. Flows also respond to risk appetite in crypto markets. Without an instrument, our coefficients are associations conditional on the controls, not causal effects. In particular, we cannot rule out that the pre-enactment association reflects rates moving supply rather than supply moving rates.
+
+\paragraph*{Short post sample and low power} With \nPostTen{} post-enactment observations at $h=10$, the minimum detectable change is about \mde{}\,bp per USD~10\,bn (Section~\ref{sec:robustness}).
+
+\paragraph*{The Act is not yet binding} The reserve requirements take effect on 18~January 2027. Our post-enactment regime measures anticipation, and it coincides with Federal Reserve easing and the run-down of ON~RRP balances. A regime dummy cannot separate these.
+
+\paragraph*{Measurement} Circulating supply is not reserve purchases. Issuers differ in how much of their reserves they hold in bills rather than in repo, deposits or money market funds, and this mix changes over time. DefiLlama data are also revised retroactively, so a later vintage may differ slightly.
+
+\paragraph*{Inference} Overlapping horizons make points on each response highly correlated. We make no correction for testing 5~tenors $\times$ 21~horizons $\times$ 2~regimes. Local projections in samples of a few hundred observations can be biased at long horizons, which argues for caution at $h=20$.

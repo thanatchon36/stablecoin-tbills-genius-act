@@ -63,7 +63,7 @@ def load_panel(cfg: dict[str, Any]) -> pd.DataFrame:
 def main() -> None:
     setup_logging()
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["fetch", "build", "estimate", "figures", "tables", "all"])
+    ap.add_argument("step", choices=["fetch", "build", "estimate", "figures", "tables", "paper", "all"])
     ap.add_argument("--refresh", action="store_true")
     a = ap.parse_args()
     cfg = load_config()
@@ -82,6 +82,11 @@ def main() -> None:
     if a.step in ("tables", "all"):
         from src.viz.tables import make_tables
         make_tables(cfg)
+    if a.step in ("paper", "all"):
+        from src.viz.paper_figures import make_paper_figures
+        from src.viz.paper_tex import make_paper_tex
+        make_paper_figures(cfg, load_panel(cfg))
+        make_paper_tex(cfg, load_panel(cfg))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "Please cite the paper (preferred-citation); if you use the code or data pipeline, also cite the software."
+title: "stablecoin-tbills-genius-act: stablecoin flows and US Treasury-bill yields after the GENIUS Act"
+abstract: >-
+  Pre-registered local projections of the association between stablecoin
+  flows and US Treasury-bill yields before and after the GENIUS Act
+  (Public Law 119-27). Open data (DefiLlama, FRED, Binance), fully
+  reproducible with `make all`.
+type: software
+authors:
+  - family-names: Chongmankhong
+    given-names: Thanatchon
+version: 1.0.0
+date-released: 2026-10-31
+license: Apache-2.0
+repository-code: "https://github.com/thanatchon36/stablecoin-tbills-genius-act"
+keywords: [stablecoins, treasury-bills, genius-act, monetary-policy, local-projections, bis, open-data]
+preferred-citation:
+  type: generic
+  title: "Stablecoin Flows and Treasury-Bill Yields after the GENIUS Act: A Pre-Registered Replication-in-Spirit"
+  authors:
+    - family-names: Chongmankhong
+      given-names: Thanatchon
+  year: 2026
+  notes: "Working paper."
+  url: "https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf"

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t">
+  <title id="t">stablecoin-tbills-genius-act</title>
+  <rect width="128" height="128" rx="28" fill="#12233f"/>
+  <!-- axes -->
+  <path d="M24 26 V102 H106" fill="none" stroke="#3b5578" stroke-width="3" stroke-linecap="round"/>
+  <!-- yield path: falls after the flow, with a confidence band -->
+  <path d="M28 46 C46 48 58 60 70 70 C82 79 92 82 104 84 L104 70 C92 68 82 64 70 56 C58 47 46 38 28 38 Z" fill="#7fb0ec" opacity="0.35"/>
+  <path d="M28 42 C46 43 58 54 70 63 C82 72 92 75 104 77" fill="none" stroke="#7fb0ec" stroke-width="5" stroke-linecap="round"/>
+  <!-- the 93-day line -->
+  <path d="M52 30 V98" stroke="#ffd166" stroke-width="3" stroke-dasharray="5 4" stroke-linecap="round"/>
+  <!-- coin -->
+  <circle cx="88" cy="38" r="15" fill="#1f5fae" stroke="#ffffff" stroke-width="3"/>
+  <path d="M93 32 C91 30 85 30 84 33 C83 37 93 37 92 42 C91 45 85 45 83 43 M88 28 V48" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

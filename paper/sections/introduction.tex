@@ -1,0 +1,16 @@
+\section{Introduction}\label{sec:intro}
+
+Fiat-backed stablecoins hold most of their reserves in short-dated US government debt. With aggregate supply of the coins we study near USD~\supplyEnd{}\,bn at the end of our sample, their issuers have become a visible class of buyer at the very front of the Treasury curve. The Bank for International Settlements (BIS) notes that their Treasury holdings are now ``on par with large jurisdictions and government money market funds'' and that a USD~3.5\,bn increase in stablecoin market capitalisation ``can already depress Treasury yields by around 2.5--5 basis points''~\cite{bis2025aer}. That estimate comes from Ahmed and Aldasoro~\cite{ahmed2025}, who document the flow--yield association with local projections and identify it with an instrument.
+
+On 18~July 2025 the United States enacted the GENIUS Act~\cite{genius2025}. It turns the composition of stablecoin reserves from an issuer choice into a legal requirement, and among Treasury securities it admits only those maturing within 93~days. If stablecoin demand moves bill yields, codifying that demand could plausibly strengthen the channel, by making reserve purchases more mechanical, or concentrate it at the shortest maturities.
+
+This paper asks whether the data so far show either. The question is narrow, and so is the design: a replication-in-spirit of the controls-only local projections of~\cite{ahmed2025}, extended with an interaction for the post-enactment regime and estimated on open data. To limit researcher degrees of freedom we committed a pre-analysis plan (PAP) with hypotheses, specification, robustness list and decision rules before downloading any yield data. A null result was declared publishable in advance.
+
+\paragraph*{Hypotheses} Writing $\beta$ for the response of the yield to an inflow (negative if inflows lower yields), the PAP states:
+\Hyp{H1}: at horizon $h=10$, $|\beta^{post}|>|\beta^{pre}|$ for the 3-month bill;
+\Hyp{H2}: after enactment the response is concentrated at the 4-week and 3-month tenors, and is flatter across tenors before;
+\Hyp{H3}: outflows move yields more than inflows of the same size, in both regimes.
+
+\paragraph*{Findings} None of the three hypotheses is supported after enactment. The post-enactment response of the 3-month yield is about half the pre-enactment one, not larger, and the difference is imprecise. The short-end concentration of~H2 is already present before enactment. The outflow asymmetry of~H3 appears before enactment, where it is plausibly driven by rate-motivated redemptions during the 2022--23 tightening cycle, but not after. A pre-registered placebo break shows that the flow--yield association shifts between sub-periods even without any legislative event.
+
+\paragraph*{Contributions} (i)~A legally dated regime break, rather than a market-size proxy, for the stablecoin--bill channel; (ii)~a term-structure test motivated by the 93-day rule; (iii)~a post-enactment sample extending seven months beyond that of~\cite{ahmed2025}; and (iv)~a fully reproducible, pre-registered pipeline in which every number in the text is generated from versioned results files.
