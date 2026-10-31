@@ -1,0 +1,81 @@
+# Configuration for "Stablecoin flows and T-bill yields after the GENIUS Act".
+# Everything the pipeline needs is here; the code reads nothing else.
+
+paths:
+  raw: data/raw
+  processed: data/processed
+  figures: output/figures
+  tables: output/tables
+
+defillama:
+  list_url: "https://stablecoins.llama.fi/stablecoins?includePrices=true"
+  chart_url: "https://stablecoins.llama.fi/stablecoincharts/all?stablecoin={id}"
+  aggregate_url: "https://stablecoins.llama.fi/stablecoincharts/all"   # all USD-pegged (totalCirculating.peggedUSD)
+  # Primary universe: fiat-backed USD payment stablecoins. DefiLlama ids are resolved at run time
+  # by symbol (pegType == peggedUSD and pegMechanism == fiat-backed; if several match, the largest
+  # current circulating supply wins). Never hardcode ids.
+  primary_symbols:
+    # Named in the brief (match Ahmed & Aldasoro 2025 + USDP)
+    - USDT
+    - USDC
+    - FDUSD
+    - PYUSD
+    - TUSD
+    - USDP
+    - BUSD     # defunct (Paxos-issued, DefiLlama "Binance USD"); history kept
+    - RLUSD
+    # Added by the brief's ">= USD 1 bn, clearly fiat/T-bill-backed" rule, evaluated on the
+    # DefiLlama list fetched 2026-10-31 (frozen here so the universe does not drift with vintage):
+    - USD1     # World Liberty Financial USD, ~3.9 bn
+    - USDG     # Paxos Global Dollar (MAS-regulated), ~2.9 bn
+    - USDGO    # Anchorage Digital Bank, ~1.3 bn
+  # Fiat-backed in DefiLlama and >= 1 bn but NOT a payment stablecoin -> excluded:
+  excluded_note: "BUIDL (BlackRock USD Institutional Digital Liquidity Fund) is a tokenised money-market fund share, not a payment stablecoin."
+  max_ffill_days: 3
+
+fred:
+  url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
+  outcomes: [DTB4WK, DTB3, DTB6, DGS1, DGS2]
+  outcomes_cmt_alt: [DGS1MO, DGS3MO]
+  controls: [EFFR, IORB, RRPONTSYD, VIXCLS, SP500, DTWEXBGS]
+
+treasury_fallback:
+  url: "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{year}/all?type=daily_treasury_bill_rates&field_tdr_date_value={year}&_format=csv"
+
+crypto:
+  binance_url: "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime={start_ms}&limit=1000"
+  binance_start: "2017-08-17"
+  coingecko_url: "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=max"
+
+sample:
+  # Estimation starts on the first US business day of 2021, aligned with Ahmed & Aldasoro (2025),
+  # whose sample starts January 2021. The panel itself is built from the earliest available date.
+  estimation_start: "2021-01-04"
+
+events:
+  # Source comments; each verified 2026-10-31 (see docs/FINDINGS.md).
+  terra: "2022-05-09"        # Terra/UST depeg begins (also the event date in Ahmed & Aldasoro 2025, sec. 3.2)
+  ftx: "2022-11-08"          # FTX collapse (Ahmed & Aldasoro 2025, sec. 3.2)
+  svb: "2023-03-10"          # SVB closed by California DFPI/FDIC; USDC depeg over 10-13 March 2023
+  tariffs: "2025-04-02"      # US "Liberation Day" tariff announcement
+  senate_passes: "2025-06-17"  # S.1582 passed Senate (Congressional Record vol. 171, legislative history of PL 119-27)
+  house_passes: "2025-07-17"   # S.1582 passed House (same source)
+  signed: "2025-07-18"         # Signed into law, Public Law 119-27 ("Approved July 18, 2025")
+
+breaks:
+  primary: "2025-07-18"
+  alternative: "2025-06-17"
+  placebo: "2024-07-18"
+  placebo_sample_end: "2025-06-16"   # placebo uses only data before the alternative break
+
+lp:
+  horizons: 20
+  primary_horizon: 10
+  flow_window: 5
+  n_lags: 5
+  primary_outcome: DTB3
+  term_outcomes: [DTB4WK, DTB3, DTB6, DGS1, DGS2]
+  event_window_bdays: 10
+  scale_bn: 10.0
+  anchor_scale_bn: 3.5
+  bands: [0.68, 0.90]

@@ -1,0 +1,150 @@
+ยังครับ รอบที่แล้วผมให้แค่จุดแก้ 3 จุดเพื่อให้แก้เอง นี่คือ prompt ใหญ่ฉบับเต็มที่ปรับชื่อ repo แล้ว ก๊อปไปวางได้ทีเดียวเลย
+# MASTER BRIEF — "Stablecoin flows and T-bill yields after the GENIUS Act"
+
+## 0. Who you are and what this is
+You are acting as two people at once: (a) a senior empirical macro-finance researcher in the style of a BIS/Fed economist, and (b) a senior Python data engineer. I am an independent researcher. The output is a short, reproducible empirical note that I will post on LinkedIn, aimed at BIS researchers (the authors of the anchor paper below are the target audience). Hard constraint: everything — data, estimation, figures, write-up — must be finished in **12 hours wall-clock** from now. Quality bar: "a BIS economist reads it and thinks: careful, honest, replicable, worth a comment", not "a crypto blog post".
+
+Effort allocation (I planned this; follow it):
+- **40% academic**: aligning with the anchor paper, pre-analysis plan, identification logic, interpretation, limitations, writing the note and the post.
+- **60% technical**: data pipeline, estimation code, tests, figures, repo hygiene.
+
+MODE: `checkpoint` — stop at the 3 checkpoints marked ⏸ and wait for me to type `continue`. If I write `MODE: autonomous` at any point, run end-to-end without stopping.
+
+Environment: Windows 11 + WSL2 (Ubuntu), 32 GB RAM, i5-13500, RTX 4070 Ti. **Do not use the GPU**; this is a CPU/pandas project. Python 3.11+. Internet access is available for data downloads and web lookups.
+
+## 1. Research question (do not expand scope)
+Primary: **Did the response of US Treasury-bill yields to stablecoin flows change after the GENIUS Act was signed into law (18 July 2025)?**
+
+Secondary (only these two):
+1. Maturity shift: given the Act's reserve rule (T-bills with ≤93 days remaining maturity), did the response concentrate at the short end (4-week / 3-month) relative to 6-month, 1-year and 2-year?
+2. Asymmetry: is the outflow effect still larger than the inflow effect post-enactment?
+
+Anchor paper: Ahmed, R. and I. Aldasoro (2025), "Stablecoins and safe asset prices", BIS Working Paper No 1270, May 2025 — likely at https://www.bis.org/publ/work1270.pdf [VERIFY number, URL and details on the web before quoting]. My recollection of their headline [VERIFY from the PDF]: a 5-day stablecoin inflow of ~USD 3.5 bn lowers 3-month T-bill yields by ~2–2.5 bp within 10 days; outflows raise yields 2–3× more. Frame our work explicitly as **"replication-in-spirit + extension"** of this paper, not as a new causal claim. In Phase 0, fetch the paper and record its exact specification, sample, controls and headline numbers in docs/FINDINGS.md so our spec can be aligned where feasible.
+
+Hypotheses (write into docs/PAP.md BEFORE running any regression):
+- H1: |β_h^post| > |β_h^pre| for 3-month bills at h ≈ 10 (stronger pass-through after the Act).
+- H2: post-enactment, the response at 4-week / 3-month exceeds that at 6-month and longer; pre-enactment the term pattern is flatter.
+- H3: asymmetry (outflows > inflows) persists in both regimes.
+A null result on any hypothesis is a legitimate, publishable finding. Do not torture the data.
+
+Institutional caveat to carry through all writing: the Act's reserve requirements are **not yet binding** — they take effect at the earlier of 18 months after enactment (~Jan 2027) or 120 days after final regulations [VERIFY]. So "post" means a post-enactment / anticipation regime, not a compliance regime. Say this plainly.
+
+## 2. Data (all free, no API keys)
+Build fetchers in `src/data/` with on-disk caching (raw JSON/CSV under `data/raw/` with a fetch timestamp in the filename). Never fabricate or hand-edit data. If a source fails for more than 20 minutes, switch to the listed fallback and log it in FINDINGS.md.
+
+A. Stablecoin circulating supply (daily) — DefiLlama
+- List + ids: https://stablecoins.llama.fi/stablecoins?includePrices=true
+- History per coin: https://stablecoins.llama.fi/stablecoincharts/all?stablecoin={id} (fields such as `date` in unix seconds and `totalCirculating.peggedUSD` — inspect the JSON and adapt; look ids up by symbol, never hardcode).
+- Primary universe: fiat-backed USD payment stablecoins — USDT, USDC, FDUSD, PYUSD, TUSD, USDP, BUSD (defunct, keep history), RLUSD, plus any other clearly fiat/T-bill-backed coin ≥ USD 1 bn. **Exclude** crypto-collateralised / synthetic coins (DAI/USDS, USDe, FRAX, etc.) from the primary aggregate; keep them in a secondary "all USD-pegged" aggregate for robustness.
+- Sample: earliest available to latest. Report the actual start date.
+- Timing: a DefiLlama snapshot dated d is taken at 00:00 UTC; treat it as the value at the **end of calendar day d−1** (US time). Document this. Robustness: shift by one day.
+- Fallback: CoinGecko https://api.coingecko.com/api/v3/coins/{tether|usd-coin|...}/market_chart?vs_currency=usd&days=max → `market_caps` (respect rate limits; sleep between calls).
+
+B. Yields and controls (daily) — FRED CSV, no key
+Pattern: https://fred.stlouisfed.org/graph/fredgraph.csv?id={SERIES} (treat "." as NaN)
+- Outcomes: DTB4WK (4-week bill), **DTB3 (3-month, primary)**, DTB6 (6-month), DGS1 (1-year), DGS2 (2-year; placebo and expectations proxy). Also DGS1MO, DGS3MO as constant-maturity alternatives.
+- Controls: EFFR, IORB, RRPONTSYD (ON RRP, USD bn), VIXCLS, SP500, DTWEXBGS (broad dollar index).
+- Fallback for bills: US Treasury daily bill rates CSV, pattern https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{YEAR}/all?type=daily_treasury_bill_rates&field_tdr_date_value={YEAR}&_format=csv (loop over years; adapt if the pattern changed).
+
+C. Crypto risk control (daily)
+- BTC close: Binance https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime={ms}&limit=1000 (paginate). Fallback: CoinGecko bitcoin market_chart.
+
+D. Event dates (hardcode in config.yaml with a source comment; VERIFY each)
+- 2022-05-09 Terra/UST collapse begins; 2022-11-08 FTX; 2023-03-10 SVB failure / USDC depeg; 2025-04-02 US tariff announcement; 2025-06-17 Senate passes GENIUS; 2025-07-17 House passes; **2025-07-18 signed into law (primary break date)**.
+
+E. Optional — only if Phases 1–3 finish early: net T-bill issuance from TreasuryDirect auctions https://www.treasurydirect.gov/TA_WS/securities/search?format=json&type=Bill as a supply control.
+
+Units: supply in USD bn; yields converted to **basis points**; returns in percent.
+
+## 3. Pre-analysis plan (write docs/PAP.md FIRST, commit it, then estimate)
+Primary specification — Jordà (2005) local projections on US business days t, horizons h = 0, …, 20:
+
+  y_{t+h} − y_{t−1} = α_h + β_h·F_t + δ_h·(F_t × Post_t) + γ_h·Post_t + Γ_h′·X_t + ε_{t+h}
+
+- y: DTB3 in bp. F_t: 5-business-day change in the primary aggregate supply, USD bn (F_t = S_t − S_{t−5} on the business-day calendar, so weekend changes accrue to Monday). Post_t = 1{t ≥ 2025-07-18}.
+- X_t baseline: lags 1–5 of Δy and of daily flow; contemporaneous ΔDGS2_t (policy-expectations proxy), ΔVIX_t, BTC return_t, S&P return_t, Δlog(RRP)_t. Robustness: lags only, no contemporaneous controls — report both and discuss the "bad control" trade-off in one paragraph.
+- Inference: Newey–West HAC with maxlags = h+1. Report 68% and 90% bands.
+- Report β_h (pre), β_h + δ_h (post), δ_h with p-values, N_pre and N_post.
+- Scaling for readers: per USD 10 bn flow and per 1 s.d. of F; one table row rescaled to USD 3.5 bn to compare with the anchor paper.
+
+Secondary specs (pre-registered): (i) same model for DTB4WK, DTB6, DGS1, DGS2 → "term structure of β_10"; (ii) asymmetry with F⁺ = max(F,0), F⁻ = min(F,0), each interacted with Post; (iii) spread outcome DTB3 − EFFR.
+
+Robustness (pre-registered; run only these): alternative break 2025-06-17; placebo break 2024-07-18; drop ±10 business days around Terra, FTX and SVB; USDT-only and USDC-only flows; all-USD-pegged aggregate; 1-day timing shift; flow windows k = 1 and k = 10.
+
+Rule: anything not in the PAP that you run later is labelled "post hoc" in FINDINGS.md and in the note. Never change the primary spec after seeing results.
+
+## 4. Technical requirements
+Repo layout (create exactly this; no notebooks required):
+
+  stablecoin-tbills-genius-act/
+    README.md                # the 2-page research note (see §6)
+    Makefile                 # `make all` = fetch → build → estimate → figures → tables
+    requirements.txt         # pandas numpy statsmodels matplotlib requests pyyaml pyarrow pytest
+    config.yaml              # series ids, universe, dates, horizons, break dates
+    src/
+      data/fetch_defillama.py  fetch_fred.py  fetch_crypto.py  build_panel.py
+      analysis/lp.py  robustness.py
+      viz/figures.py  tables.py
+      pipeline.py            # orchestrates everything; idempotent
+    tests/test_data_sanity.py
+    data/raw/  data/processed/     # commit processed parquet + small raw files (<50 MB total)
+    output/figures/  output/tables/
+    docs/PAP.md  FINDINGS.md  LINKEDIN.md  SUMMARY_TH.md  REPO_META.md
+
+Standards: Python 3.11+ in a venv (`python3 -m venv .venv`), type hints, small pure functions, docstrings, `logging` not `print` for pipeline steps, deterministic (fixed seed if anything is bootstrapped), ruff-clean if available. No classes unless they simplify. No Docker, no dashboards, no ML, no GPU libraries.
+
+Data-sanity tests (pytest) must pass before any regression: no duplicate dates; monotone dates; latest observation ≤ 7 days old; supply > 0 for every coin; yields within 0–7%; share of NaNs after alignment < 2% and logged; N_pre and N_post printed. If you can look up one web-reported supply figure per major coin, assert our series is within ±30% of it; otherwise skip and log.
+
+Figures (matplotlib, 300 dpi PNG + SVG, one consistent style, Source/Note footer on every figure):
+- fig1_irf_pre_post (the hero): β_h pre (grey) vs post (colour) for DTB3 overlaid, 90% and 68% bands, h = 0–20, scaled per USD 10 bn; subtitle with N_pre/N_post and sample dates.
+- fig2_term_structure: β_10 with 90% CI across 4w, 3m, 6m, 1y, 2y, pre vs post side by side.
+- fig3_data_overview: top panel stacked supply by coin (USD bn); bottom panel DTB4WK and DTB3 with vertical lines at the event dates.
+- fig4_asymmetry: inflow vs outflow IRFs, pre vs post (2×2 small multiples).
+- fig_linkedin: fig1 re-rendered at 1200×1200 px, large fonts, one-sentence takeaway as the title.
+Tables: table1_primary (.md + .csv): β_h at h = 0, 5, 10, 20 for pre / post / difference with SEs and N. table2_robustness (.md): one row per robustness check with β_10 pre / post / diff.
+
+Git: `git init`, commit at the end of every phase with a clear message. Do not push; I will.
+
+Repo metadata: the GitHub repo is `stablecoin-tbills-genius-act`. Write docs/REPO_META.md containing (a) the one-line "About" description: "Do stablecoin flows move US T-bill yields differently after the GENIUS Act? Replication-in-spirit + extension of Ahmed & Aldasoro (2025, BIS WP). Open data, local projections, fully reproducible." and (b) GitHub topics: stablecoins, treasury-bills, genius-act, monetary-policy, local-projections, bis, open-data, python. Use the URL placeholder https://github.com/<my-handle>/stablecoin-tbills-genius-act everywhere a repo link is needed; I will replace <my-handle>.
+
+## 5. Timeline and checkpoints (12 h total; keep docs/FINDINGS.md as a timestamped running log)
+| Phase | Clock | Academic/Technical | Deliverable |
+|---|---|---|---|
+| 0 Setup | 0:00–0:30 | 60/40 | repo skeleton, config, **PAP.md committed**, anchor paper fetched and its spec/numbers recorded in FINDINGS.md |
+| 1 Data | 0:30–3:00 | 20/80 | fetchers, aligned panel, tests green, fig3 draft, summary stats → ⏸ CHECKPOINT 1: show me summary stats + fig3 |
+| 2 Estimation | 3:00–6:30 | 40/60 | primary LP, term structure, asymmetry, robustness table → ⏸ CHECKPOINT 2: show me table1 + a text summary of the IRFs; **tell me plainly if the result is null** |
+| 3 Figures | 6:30–8:00 | 30/70 | all figures final |
+| 4 Writing | 8:00–10:30 | 90/10 | README note, LINKEDIN.md, SUMMARY_TH.md, REPO_META.md → ⏸ CHECKPOINT 3: show drafts before polishing |
+| 5 QA/buffer | 10:30–12:00 | 50/50 | `make all` works from a clean clone; every number in the text matches the tables; [VERIFY] items resolved or listed |
+If a phase runs >25% over budget, cut from the optional and robustness lists first — never from the primary spec, the tests or the note.
+
+## 6. Writing requirements (academic voice, measured)
+README.md (≈1,200–1,800 words):
+1. Title + one-line takeaway.
+2. Abstract (≤150 words): question, data, method, result with magnitudes, caveat.
+3. Why this matters: link to the BIS Annual Economic Report 2025 discussion of stablecoins and the Act's reserve rule — two paragraphs, no hype.
+4. Data: sources, universe, timing convention, sample dates, N.
+5. Method: equation, controls, inference, link to PAP.md.
+6. Results: primary (fig1, table1); term structure (fig2); asymmetry (fig4). Always give economic magnitudes, e.g. "a USD 10 bn 5-day inflow is associated with X bp (90% CI a to b) lower 3-month yields after 10 days pre-enactment versus Y bp post-enactment; the difference is / is not statistically distinguishable from zero."
+7. Robustness: table2, one paragraph.
+8. What this does NOT show: endogeneity of flows (rates → stablecoin demand; risk-on/off), short post sample and low power, Act not yet binding, DefiLlama measurement, overlapping-horizon inference. We list our weaknesses before anyone else does.
+9. Relation to Ahmed & Aldasoro (2025): what we replicate, what differs, what we add.
+10. Reproduce: `make all`; data vintage date.
+11. References: Ahmed & Aldasoro (2025) BIS WP [VERIFY no.]; BIS Annual Economic Report 2025, stablecoin chapter [VERIFY chapter]; Jordà (2005); Newey & West (1987); GENIUS Act, Public Law 119-27 [VERIFY].
+
+docs/LINKEDIN.md (≤1,500 characters, English): line 1 is a hook containing the key number; one sentence on what the GENIUS Act requires; three short findings with magnitudes; one sentence of limitations; "Code + data: https://github.com/<my-handle>/stablecoin-tbills-genius-act"; credit the anchor paper and name its authors (I will tag them); at most one emoji; hashtags #stablecoins #Treasuries #BIS #monetarypolicy. Add two lines of alt-text for the chart.
+
+docs/SUMMARY_TH.md: a 10-line Thai summary of findings and caveats for me.
+
+Language rules: never write "stablecoins cause…"; use "is associated with", "consistent with", "we cannot rule out". Quantify every claim. No words like "massive" or "game-changing".
+
+## 7. Default decisions (assume these; do not ask)
+- If DefiLlama history starts after 2021-01-01, use what exists and say so.
+- Gaps in a coin's history: forward-fill ≤3 days and log; longer gaps → NaN, excluded from the aggregate on those dates, logged.
+- If the post sample has <200 business days, still run everything and add a power warning to the note.
+- If results are null or opposite-signed, that is the headline; write it as such.
+- If web access is unavailable, keep every [VERIFY] item listed in README under "To verify before publication" and tell me at the end.
+
+## 8. First action
+Echo back a plan of ≤15 lines (data sources, universe, primary spec, checkpoints), then start Phase 0 immediately. No clarifying questions unless something is truly blocking.
+จุดที่เปลี่ยนจากฉบับก่อน: ชื่อโฟลเดอร์ใน §4, เพิ่มย่อหน้า Repo metadata กับไฟล์ REPO_META.md และลิงก์ repo ใน LINKEDIN.md ครับ
