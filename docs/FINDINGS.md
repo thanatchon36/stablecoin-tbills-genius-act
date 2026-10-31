@@ -78,3 +78,37 @@ Retrieved via the Wayback Machine snapshot of 2025-05-31 of `bis.org/publ/work12
 - BUIDL (2.0 bn) is excluded because it is a tokenised MMF share, not a payment stablecoin.
 - Crypto-collateralised and synthetic coins (USDS, DAI, USDe, USDf, USDD, FRAX, …) are excluded from the primary aggregate but are included in "all USD-pegged".
 - DefiLlama's most recent row is an intraday snapshot dated the fetch day. It is dropped as incomplete.
+
+## 2026-10-31 18:20 — Phase 1: data
+
+**Vintage:** DefiLlama, FRED and Binance were all fetched on 2026-10-31 around 11:14 UTC. Raw files are under `data/raw/` with UTC timestamps in their names.
+- **Fallbacks:** none needed. DefiLlama, FRED and Binance all responded on the first try, so the CoinGecko and Treasury.gov fallbacks were not built (simplicity).
+- **DefiLlama ids** (resolved by symbol): USDT 1, USDC 2, FDUSD 119, PYUSD 120, TUSD 7, USDP 11, BUSD 4, RLUSD 250, USD1 262, USDG 286, USDGO 347.
+- **First DefiLlama snapshot:**
+  - USDT 2017-11-29; USDC 2018-09-11; USDP 2018-09-11; TUSD 2019-01-05; BUSD 2020-04-17;
+  - FDUSD 2023-05-27; PYUSD 2023-08-08; RLUSD 2024-08-23; USD1 2025-04-28; USDG 2025-07-12; USDGO 2026-02-17.
+  - DefiLlama history starts before 2021-01-01, so the full estimation sample from 2021 is covered.
+- **Panel:** built on the DTB3 business-day calendar from **2017-11-28 to 2026-10-29** (2,230 days). The estimation sample starts 2021-01-04: **N_pre = 1,135 and N_post = 322** business days.
+  - The post sample has more than 200 days, so the PAP power-warning rule is not triggered, although power remains limited (see results).
+- **Gaps:**
+  - BUSD has 6 missing days, forward-filled.
+  - RLUSD has 20 missing days (2024-08-29 to 2024-09-17, pre-launch, supply ≈ 0), so it is excluded from the aggregate on those days.
+  - No other coin has gaps.
+- **NaN shares** after alignment in the estimation sample are 0.0% for every variable used in estimation. IORB is NaN before 2021-07-29 (9.9%), but it is not used in any regression. DTWEXBGS is 0.07%.
+- **Tests:** 8/8 pass, including the external check. USDT and USDC on 2026-03-31 are within ±30% of Ahmed & Aldasoro's reported USD 184 bn and 80 bn (March 2026).
+- **Data note:** ON RRP falls to almost zero after mid-2025 (post mean USD 14 bn, minimum USD 0.03 bn). The pre-registered Δlog(RRP + 1) guard is therefore needed.
+
+**Summary statistics, estimation sample (2021-01-04 to 2026-10-29):**
+
+| Variable | Full mean (s.d.) | Pre mean (s.d.) | Post mean (s.d.) |
+|---|---|---|---|
+| 5-day flow, primary (USD bn) | 0.82 (1.81) | 0.89 (1.77) | 0.59 (1.91) |
+| Primary supply (USD bn) | 164.7 (65.2) | 135.5 (39.4) | 267.7 (12.0) |
+| 3-month bill (bp) | 330 (191) | 317 (215) | 377 (20) |
+| Daily Δ 3-month bill (bp) | 0.27 (3.44) | 0.37 (3.73) | −0.07 (2.07) |
+| VIX | 19.2 (5.1) | 19.6 (5.4) | 17.7 (3.1) |
+| ON RRP (USD bn) | 850 (850) | 1,087 (820) | 14 (35) |
+
+- The 5-day flow moments are very close to Ahmed & Aldasoro's (mean 0.88, s.d. 1.74), even though they use CoinMarketCap and seven coins.
+- **The post-enactment regime is not "more flow".** Average 5-day inflows are smaller (0.59 vs 0.89 bn), the flow s.d. is similar, and the supply level is about twice as large. Primary supply peaked around USD 281 bn and has drifted down to USD 267 bn by end-October 2026.
+- Daily bill-yield volatility is about 45% lower post-enactment (s.d. 2.07 vs 3.73 bp).
