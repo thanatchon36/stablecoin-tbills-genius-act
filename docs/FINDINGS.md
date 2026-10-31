@@ -112,3 +112,57 @@ Retrieved via the Wayback Machine snapshot of 2025-05-31 of `bis.org/publ/work12
 - The 5-day flow moments are very close to Ahmed & Aldasoro's (mean 0.88, s.d. 1.74), even though they use CoinMarketCap and seven coins.
 - **The post-enactment regime is not "more flow".** Average 5-day inflows are smaller (0.59 vs 0.89 bn), the flow s.d. is similar, and the supply level is about twice as large. Primary supply peaked around USD 281 bn and has drifted down to USD 267 bn by end-October 2026.
 - Daily bill-yield volatility is about 45% lower post-enactment (s.d. 2.07 vs 3.73 bp).
+
+## 2026-10-31 18:22 — Phase 2: estimation (all pre-registered; no post-hoc regressions)
+
+**Estimator check:** on simulated data with known β_pre = −0.5 and β_post = −1.0, the estimator returned −0.49 and −1.00 (h = 0), and asymmetric slopes were recovered too. This is a scratch check and is not committed.
+
+**Plain statement of the result: the primary hypothesis is NOT supported. The result is null and, if anything, points the other way.**
+
+Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
+
+| Regime | Estimate | 90% CI |
+|---|---|---|
+| Pre-enactment | −10.9 bp (SE 4.2; p = 0.009) | −17.7 to −4.1 |
+| Post-enactment | −5.6 bp (SE 4.5; p = 0.22) | −13.0 to +1.9 |
+| Difference δ₁₀ | +5.3 bp (SE 5.2; p = 0.30) | — |
+
+- **H1 not supported.** The post point estimate is about half the pre estimate, so δ has the opposite sign from H1, and it is not statistically distinguishable from zero.
+- **Scaled to the anchor's USD 3.5 bn:** pre −3.8 bp, post −1.9 bp.
+- **Per 1 s.d. of F (USD 1.81 bn):** pre −2.0 bp, post −1.0 bp.
+- **Lags-only controls** give virtually identical numbers (pre −11.0, post −5.7, δ +5.4, p = 0.31), so the bad-control concern does not change the result.
+- **Pre IRF shape:** builds steadily to −23.9 bp at h = 20 (p = 0.006). The post IRF bottoms near −7.4 bp around h = 11–13 and drifts back to −4.3 bp at h = 20. At h = 20 the difference is +19.6 bp, p = 0.08.
+
+**Comparison with the anchor paper.** Our pre-enactment controls-only estimate (−3.8 bp per USD 3.5 bn at h = 10) is close to Ahmed & Aldasoro's June 2026 **IV** estimate (about −4 bp at 10 days). It is much larger than their **controls-only** estimate (< 1 bp, insignificant). The likely reason is that their control set includes lead-h changes in FFR, 6M and 1Y yields, plus MPS shocks, TGA, MMF flows and more. Ours does not, so our β likely still contains policy-path confounding (e.g. 2022: rate hikes and stablecoin outflows together). Our estimates should be read as conditional associations, not effects.
+
+**Term structure (H2; Table 3, Fig 2), β₁₀ per USD 10 bn:**
+
+| Tenor | Pre | Post |
+|---|---|---|
+| 4-week | −14.8 (p = 0.12) | −3.2 (p = 0.68) |
+| 3-month | −10.9 (p = 0.01) | −5.6 (p = 0.22) |
+| 6-month | −5.6 (p = 0.21) | −0.8 (p = 0.87) |
+| 1-year | −4.7 (p = 0.42) | −1.6 (p = 0.84) |
+| 2-year | +0.1 (p = 0.99) | +2.2 (p = 0.81) |
+
+- **H2 not supported.** The short-end concentration (magnitude declining with maturity) is visible **before** enactment. After enactment every tenor is smaller and imprecise, and no tenor's δ₁₀ is significant (p ≥ 0.26).
+
+**Asymmetry (H3; Table 4, Fig 4), per USD 3.5 bn, h = 10:**
+
+| Regime | Inflow | Outflow | p(β⁻ = β⁺) |
+|---|---|---|---|
+| Pre | −1.6 bp (p = 0.30) | **+16.9 bp** (p = 0.03) | 0.07 |
+| Post | −4.9 bp (p = 0.01) | −3.7 bp (p = 0.28; wrong sign: outflows associated with *lower* yields) | 0.05 |
+
+- **H3: pre, the "outflows > inflows" pattern is present** (consistent with the May 2025 version of the anchor paper), but the magnitude is implausible (+44 bp at h = 20). It is almost certainly contaminated by the 2022–23 hiking cycle: 321 of the 412 pre-enactment outflow days fall in 2022–23.
+- **Post, H3 is not supported.** The point estimates are inflow −4.9 vs outflow −3.7 bp, i.e. both outflows and inflows are associated with lower yields. The equal-slope test rejects at p = 0.05 *because the signs differ*, not because outflows are larger.
+- Post has 135 outflow days out of 322, mostly in 2026.
+
+**Spread outcome (DTB3 − EFFR), h = 10, per USD 10 bn:** pre +4.1 (p = 0.54), post −2.1 (p = 0.75), δ −6.2 (p = 0.46). There is no detectable association with the bill–policy-rate spread in either regime. This is consistent with the DTB3 association reflecting policy-rate expectations rather than a bill-specific premium.
+
+**Robustness (Table 2):**
+- δ₁₀ is positive (post weaker) and insignificant in 9 of the 10 non-placebo variants. USDT-only flows are the only exception: post −13.5 vs pre −10.7, δ −2.8, p = 0.71.
+- Post β₁₀ is significant at 10% only for USDT-only (p = 0.06), all-USD-pegged (p = 0.04) and k = 10 (p < 0.01).
+- **The placebo is a problem for any break interpretation.** A break at 2024-07-18, estimated on data ending 2025-06-16, gives δ = +23.1 bp (p = 0.002), with a "post" β of +9.6 bp. The flow–yield association is not stable over time even absent any legislative event, so even a significant GENIUS δ could not have been attributed to the Act. We report this prominently.
+
+**Power:** N_post = 312 at h = 10. The SE of δ₁₀ is 5.2 bp per USD 10 bn, so the minimum detectable difference at 80% power (two-sided 5%) is roughly 2.8 × 5.2 ≈ 15 bp per USD 10 bn. That is about 1.4 times the entire pre-enactment estimate, so the design is underpowered for plausible changes.
