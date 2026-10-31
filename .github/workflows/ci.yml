@@ -18,8 +18,17 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt ruff==0.17.3
       - run: ruff check src tests
-      # Rebuild from the committed raw data (S&P 500 and VIX are fetched from FRED; not redistributable): panel -> tests -> estimates -> figures -> tables -> paper assets
-      # fred.stlouisfed.org refuses GitHub runners; the FRED API (free key, repository secret) is the fallback.
+      # S&P 500 and VIX are copyrighted, so they are not in the repo. fred.stlouisfed.org refuses GitHub
+      # runners, so CI restores the paper's vintage (xz + base64) from private repository secrets.
+      # Without the secrets (e.g. forks), make all fetches from FRED, or the FRED API if FRED_API_KEY is set.
+      - name: Restore S&P 500 and VIX vintage from repository secrets
+        env:
+          SP500: ${{ secrets.FRED_SP500_CSV_XZ }}
+          VIX: ${{ secrets.FRED_VIXCLS_CSV_XZ }}
+        run: |
+          if [ -n "$SP500" ]; then printf '%s' "$SP500" | base64 -d | xz -d > data/raw/fred_SP500_20261031T121112Z.csv; fi
+          if [ -n "$VIX" ]; then printf '%s' "$VIX" | base64 -d | xz -d > data/raw/fred_VIXCLS_20261031T121111Z.csv; fi
+      # Rebuild from the raw data: panel -> tests -> estimates -> figures -> tables -> paper assets
       - run: make all PY=python
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
