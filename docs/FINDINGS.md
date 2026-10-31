@@ -222,3 +222,4 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 - **README** cut down at the user's request to the takeaway, reproduction instructions and links. The full note is the paper (web or PDF).
 - **No change to any estimate.**
 - **DOI:** Zenodo archived release v1.0.0: concept DOI 10.5281/zenodo.23836447 (all versions), version DOI 10.5281/zenodo.23836448. Added to README, CITATION.cff, the web paper and the HF card.
+- **CI and FRED:** a probe on 2026-10-31 showed fred.stlouisfed.org refuses connections from GitHub-hosted runners, while api.stlouisfed.org is reachable. If fredgraph is unreachable and FRED_API_KEY is set, `fetch_fred` now falls back to the FRED API, writing the same CSV layout; a test checks that the round trip is exact. CI needs the repository secret FRED_API_KEY.

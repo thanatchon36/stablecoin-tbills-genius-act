@@ -78,3 +78,14 @@ def test_supply_matches_external_reference(panel: pd.DataFrame, col: str) -> Non
     date, ref = WEB_REF[col]
     ours = panel[col].asof(pd.Timestamp(date))
     assert abs(ours / ref - 1) <= 0.30, f"{col} {ours:.1f} vs reference {ref}"
+
+
+def test_fred_api_fallback_matches_fredgraph() -> None:
+    """The FRED-API fallback (used in CI) must parse to exactly the fredgraph series."""
+    from src.data.fetch_fred import api_to_csv, parse_fred_csv
+
+    path = max((ROOT / "data" / "raw").glob("fred_DTB3_*.csv"))
+    s = parse_fred_csv(path.read_text(), "DTB3")
+    obs = [{"date": d.strftime("%Y-%m-%d"), "value": "." if pd.isna(v) else repr(v)} for d, v in s.items()]
+    assert s.isna().any()  # the round trip covers missing values
+    pd.testing.assert_series_equal(parse_fred_csv(api_to_csv(obs, "DTB3"), "DTB3"), s)

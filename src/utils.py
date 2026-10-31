@@ -48,12 +48,14 @@ def fetch_timestamp(path: Path) -> datetime:
     return datetime.strptime(stamp, TS_FMT).replace(tzinfo=UTC)
 
 
-def http_get(url: str, retries: int = 4, sleep: float = 2.0, timeout: float = 60.0) -> requests.Response:
-    """GET with simple exponential back-off; raises after the last failure."""
+def http_get(url: str, retries: int = 4, sleep: float = 2.0, timeout: float = 60.0,
+             params: dict[str, str] | None = None) -> requests.Response:
+    """GET with simple exponential back-off; raises after the last failure. `params` (e.g. an API
+    key) are sent as the query string but never logged."""
     headers = {"User-Agent": "stablecoin-tbills-genius-act research (python-requests)"}
     for attempt in range(retries):
         try:
-            r = requests.get(url, headers=headers, timeout=timeout)
+            r = requests.get(url, headers=headers, timeout=timeout, params=params)
             r.raise_for_status()
             return r
         except requests.RequestException as e:
