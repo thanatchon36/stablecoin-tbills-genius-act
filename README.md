@@ -110,7 +110,7 @@ Table 2 ([output/tables/table2_robustness.md](output/tables/table2_robustness.md
 
 ## 7. Relation to Ahmed & Aldasoro (2025)
 
-- **What we replicate.** Their flow definition (five-day change in supply, on trading days), their outcome (the 3-month bill), local projections and Newey–West bands. Our five-day flow moments (mean USD 0.82 bn, s.d. 1.81) closely match theirs (0.88, 1.74).
+- **What we replicate.** Their flow definition (five-day change in supply, on trading days), their outcome (the 3-month bill), local projections and Newey–West bands. Our five-day flow moments (mean USD 0.83 bn, s.d. 1.81) closely match theirs (0.88, 1.74).
 - **What differs.**
   - We use a much smaller control set and no instrument.
   - Our pre-enactment estimate (−3.8 bp per USD 3.5 bn) resembles their June 2026 *IV* estimate (about −4 bp at 10 days). It is far larger than their *controls-only* estimate (< 1 bp, insignificant), which suggests our β still contains confounding that their lead-yield and policy-shock controls remove.
@@ -128,7 +128,7 @@ make all        # build -> tests -> estimate -> figures -> tables (uses committe
 make refresh    # re-download all sources (new vintage) and rebuild
 ```
 
-Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`. The running log is in [docs/FINDINGS.md](docs/FINDINGS.md). Repository: https://github.com/<my-handle>/stablecoin-tbills-genius-act
+Data vintage: 31 October 2026 (DefiLlama, FRED, Binance). The raw files are timestamped in `data/raw/`. The running log is in [docs/FINDINGS.md](docs/FINDINGS.md). `src/utils.py` (config, logging, cached HTTP) is added to the planned layout. The CoinGecko and Treasury fallback sources are configured but were not needed and are not implemented. Repository: https://github.com/<my-handle>/stablecoin-tbills-genius-act
 
 ## 9. References
 

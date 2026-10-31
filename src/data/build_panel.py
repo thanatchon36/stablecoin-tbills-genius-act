@@ -113,9 +113,10 @@ def nan_report(panel: pd.DataFrame, start: str) -> pd.Series:
 
 def summary_stats(panel: pd.DataFrame, start: str, k: int = 5) -> pd.DataFrame:
     """Summary statistics of key variables, pre/post, in the estimation sample."""
-    p = panel[panel.index >= pd.Timestamp(start)].copy()
+    p = panel.copy()  # flows/changes before truncation, so N matches the regression sample
     p["F5"] = p["S_primary"] - p["S_primary"].shift(k)
     p["dDTB3"] = p["DTB3"].diff()
+    p = p[p.index >= pd.Timestamp(start)]
     cols = {"F5": "5-day flow, primary (USD bn)", "S_primary": "Primary supply (USD bn)",
             "DTB3": "3-month bill (bp)", "dDTB3": "Daily change 3-month bill (bp)",
             "DGS2": "2-year CMT (bp)", "VIXCLS": "VIX", "RRPONTSYD": "ON RRP (USD bn)"}

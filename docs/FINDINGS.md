@@ -175,3 +175,17 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 - Statute citation checked against the govinfo text: Public Law 119-27, 139 Stat. 419.
 - "Why this matters" quotes the BIS AER 2025 Chapter III (ar2025e3.htm): "can already depress Treasury yields by around 2.5–5 basis points", and Treasury holdings "on par with large jurisdictions and government money market funds".
 - Deviation from the brief's layout: src/utils.py was added (config, logging, cached HTTP). The CoinGecko and Treasury fallbacks are listed in config.yaml but were not needed or built, because no primary source failed.
+
+## Phase 5 — QA (2026-10-31T11:28Z)
+
+- **Clean clone:** `git clone` → fresh venv → `pip install -r requirements.txt` → `make all` completes in about 7 s from the committed raw data. All 8 tests pass. Every table, every PNG and `meta.json` is byte-identical to the working copy.
+- **SVG determinism fix:** the SVGs differed run to run (random hash salt and an embedded date). Now `svg.hashsalt` is fixed and `metadata={"Date": None}` is passed, so repeated runs give identical SVGs. The figure content is unchanged.
+- **Summary-stats correction:** the 5-day flow was computed *after* truncating to 2021-01-04, which dropped 5 days. It is now computed before truncation, so N = 1,457 matches the regression sample.
+  - Revised moments: full sample mean 0.83 / s.d. 1.81; pre 0.90 / 1.77; post 0.59 / 1.91.
+  - The Phase 1 table above (0.82 / 0.89) is kept as logged. The README uses the corrected values. No regression input changed.
+- **Number check:** every number in README.md, docs/LINKEDIN.md and docs/SUMMARY_TH.md was compared with output/tables/*.md and lp_results.json (scaled ×10 or ×3.5). All match after the correction above.
+- **ruff:** clean.
+- **[VERIFY] items:** none are open in README or docs. Items to verify by hand before publication:
+  1. the OCC Bulletin 2026-50 date and wording, taken from a news and OCC web search, not the Federal Register text;
+  2. the anchor paper's June 2026 revision numbers, which may change again;
+  3. the GitHub handle placeholder.

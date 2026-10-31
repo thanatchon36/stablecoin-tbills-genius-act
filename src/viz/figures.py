@@ -28,7 +28,7 @@ plt.rcParams.update({
     "axes.edgecolor": INK2, "axes.labelcolor": INK2, "xtick.color": INK2, "ytick.color": INK2,
     "axes.spines.top": False, "axes.spines.right": False, "axes.grid": True, "grid.color": GRID,
     "grid.linewidth": 0.6, "axes.axisbelow": True, "legend.frameon": False, "lines.linewidth": 1.8,
-    "text.color": INK,
+    "text.color": INK, "svg.hashsalt": "genius-act",  # deterministic SVG ids
 })
 
 
@@ -47,7 +47,7 @@ def footer(fig: plt.Figure, note: str, y: float = 0.01, size: float = 7.0, width
 def save(fig: plt.Figure, cfg: dict[str, Any], name: str, dpi: int = 300) -> None:
     out = _out(cfg)
     fig.savefig(out / f"{name}.png", dpi=dpi)
-    fig.savefig(out / f"{name}.svg")
+    fig.savefig(out / f"{name}.svg", metadata={"Date": None})
     plt.close(fig)
     log.info("figure written: %s", name)
 
