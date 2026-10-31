@@ -247,6 +247,7 @@ def main() -> int:
         f"{values['nPre']} pre / {values['nPost']} post business days · "
         f"data vintage {values['vintage']}"
     )
+    d = doi()
     blob = f"{REPO_URL}/blob/main"
     actions = (
         '<li><a href="paper.pdf">Download PDF</a></li>'
@@ -256,7 +257,8 @@ def main() -> int:
         f'<li><a href="{blob}/docs/FINDINGS.md">Research log</a></li>'
         f'<li><a href="{blob}/docs/SUMMARY_TH.md">สรุปภาษาไทย</a></li>'
     )
-    d = doi()
+    if d:
+        actions += f'<li><a href="https://doi.org/{d}">DOI {d}</a></li>'
     bib = (
         "@techreport{chongmankhong2026genius,\n"
         "  author = {Chongmankhong, Thanatchon},\n"

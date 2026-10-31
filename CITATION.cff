@@ -13,6 +13,7 @@ authors:
 version: 1.0.0
 date-released: 2026-10-31
 license: Apache-2.0
+doi: "10.5281/zenodo.23836447"
 repository-code: "https://github.com/thanatchon36/stablecoin-tbills-genius-act"
 keywords: [stablecoins, treasury-bills, genius-act, monetary-policy, local-projections, bis, open-data]
 preferred-citation:
@@ -23,4 +24,5 @@ preferred-citation:
       given-names: Thanatchon
   year: 2026
   notes: "Working paper."
+  doi: "10.5281/zenodo.23836447"
   url: "https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf"

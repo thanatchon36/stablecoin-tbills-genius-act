@@ -2,6 +2,7 @@
 
 <h1 align="center">Stablecoin flows and T-bill yields after the GENIUS Act</h1>
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23836447.svg)](https://doi.org/10.5281/zenodo.23836447)
 [![CI](https://github.com/thanatchon36/stablecoin-tbills-genius-act/actions/workflows/ci.yml/badge.svg)](https://github.com/thanatchon36/stablecoin-tbills-genius-act/actions/workflows/ci.yml)
 [![Paper](https://img.shields.io/badge/paper-read%20online-2f5f9e)](https://thanatchon36.github.io/stablecoin-tbills-genius-act/)
 [![PDF](https://img.shields.io/badge/paper-PDF-b2182b)](https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf)
@@ -81,6 +82,7 @@ See [`CITATION.cff`](CITATION.cff), or:
   title       = {Stablecoin Flows and Treasury-Bill Yields after the {GENIUS} Act: A Pre-Registered Replication-in-Spirit},
   year        = {2026},
   type        = {Working paper},
+  doi         = {10.5281/zenodo.23836447},
   url         = {https://thanatchon36.github.io/stablecoin-tbills-genius-act/}
 }
 ```
