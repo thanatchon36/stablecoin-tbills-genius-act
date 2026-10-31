@@ -204,3 +204,20 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 - **Repository, following the harnesswatch README:** logo, badges, link row, CITATION.cff, Apache-2.0 LICENSE (the data stay under their providers' terms), and a CI workflow.
   - CI rebuilds offline and fails if paper/numbers.tex or any table changes.
 - **Pinned versions:** requirements.txt now pins the exact versions that produced the committed results.
+
+## Phase 7 — Data licensing, web paper, data mirror (2026-10-31T12:30Z)
+
+- **Copyrighted series removed from the repository going forward.** FRED classes SP500 as *Copyrighted: Pre-Approval Required*. VIXCLS carries a Cboe copyright, reprinted by FRED with permission.
+  - Their raw files and `data/processed/panel.parquet`, which contains both columns, are now gitignored. `make all` re-downloads the two series from FRED.
+  - Check: deleted both files and ran `make all`. Both series were re-fetched, the 8 tests passed, and `paper/numbers.tex`, `paper/tables/` and `output/tables/` were unchanged byte for byte.
+  - The earlier commits still contain the files, because git history was not rewritten.
+- **Data mirror:** https://huggingface.co/datasets/thanatchon36/stablecoin-tbills-genius-act (public). It includes:
+  - the DefiLlama raw files;
+  - the FRED series that FRED classes as public domain (yields, IORB, DTWEXBGS) or copyrighted with citation required (EFFR, ON RRP, NY Fed);
+  - the processed data and the results.
+  - Excluded: SP500, VIXCLS and Binance BTC, whose redistribution terms are unclear. The panel is uploaded without those three columns.
+- **Web version of the paper:** `paper/web.py` turns `paper/paper.tex` into `docs/paper/index.html` with pandoc 3.8.3, adapted from harnesswatch. It uses IEEE CSL citations.
+  - GitHub Pages serves it at https://thanatchon36.github.io/stablecoin-tbills-genius-act/
+  - Its numbers come from the same `numbers.tex`, and the output is deterministic.
+- **README** cut down at the user's request to the takeaway, reproduction instructions and links. The full note is the paper (web or PDF).
+- **No change to any estimate.**

@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GENIUS Act and T-bills</title>
+<meta name="description" content="Pre-registered local projections of stablecoin flows and US Treasury-bill yields before and after the GENIUS Act.">
+<meta name="author" content="Thanatchon Chongmankhong">
+<style>
+/* One reading column (~46rem) with a results strip up top. System font stacks only: the page is a
+   single self-contained file with no third-party requests. Colour tokens on :root, redefined for dark. */
+:root {
+  --paper: #fbfbf9; --ink: #17191c; --ink-2: #4c5058; --rule: #dcdcd6;
+  --accent: #1f5fae; --accent-soft: #e6eef8;
+  --pos: #1d6b52; --pos-soft: #e3f1ea; --null: #6b6f78; --null-soft: #eeeeea;
+  --find: #8a5a12; --find-soft: #f6eedd; --plate: #ffffff; --quote: #f3f3ef;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-body: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15171a; --ink: #e8e9ec; --ink-2: #a6abb4; --rule: #30343a;
+    --accent: #7fb0ec; --accent-soft: #1b2a3d; --pos: #7dcfac; --pos-soft: #16302a;
+    --null: #a6abb4; --null-soft: #23262b; --find: #e7bd73; --find-soft: #33291a;
+    --plate: #f4f4f2; --quote: #1d2024; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15171a; --ink: #e8e9ec; --ink-2: #a6abb4; --rule: #30343a;
+  --accent: #7fb0ec; --accent-soft: #1b2a3d; --pos: #7dcfac; --pos-soft: #16302a;
+  --null: #a6abb4; --null-soft: #23262b; --find: #e7bd73; --find-soft: #33291a;
+  --plate: #f4f4f2; --quote: #1d2024; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.62 var(--font-body); }
+.page { max-width: 46rem; margin: 0 auto; padding-inline: 16px; padding-block: 48px 72px;
+  display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 650; text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(1.7rem, 4.2vw, 2.35rem); margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 1.4rem; margin: 2.2em 0 0.5em; }
+h3 { font-size: 1.12rem; margin: 1.8em 0 0.4em; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code { font: 500 0.84em var(--font-mono); overflow-wrap: anywhere; }
+pre { background: var(--quote); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px;
+  overflow-x: auto; font-size: 0.84rem; line-height: 1.5; }
+pre code { font-weight: 400; font-size: inherit; overflow-wrap: normal; }
+.masthead { display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--rule); padding-bottom: 28px; }
+.kicker { margin: 0; font: 500 0.78rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); }
+.subtitle { margin: 0; font-style: italic; color: var(--ink-2); font-size: 1.05rem; }
+.byline { margin: 0; color: var(--ink-2); }
+.meta { margin: 0; font: 400 0.8rem/1.6 var(--font-mono); color: var(--ink-2); }
+.meta b { font-weight: 500; color: var(--ink); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+.actions a { display: inline-block; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px;
+  font: 500 0.78rem var(--font-mono); text-decoration: none; color: var(--ink); }
+.actions a:hover { border-color: var(--accent); color: var(--accent); }
+.abstract h2, .results h2, .toc h2, .cite h2 { margin: 0 0 10px; font-size: 0.82rem; font-family: var(--font-mono);
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-2); }
+.abstract-body p { margin: 0 0 0.8em; font-size: 1.04rem; }
+.abstract-body p:last-child { margin-bottom: 0; }
+.results .note { margin: 0 0 14px; color: var(--ink-2); font-size: 0.95rem; }
+.result-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 8px; }
+.r { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "id tag" "text text"; gap: 2px 10px;
+  padding: 10px 12px; border-radius: 6px; border-left: 3px solid; font-size: 0.9rem; line-height: 1.4; }
+.r-pos { background: var(--pos-soft); border-color: var(--pos); }
+.r-ref { background: var(--find-soft); border-color: var(--find); }
+.r-null, .r-nf { background: var(--null-soft); border-color: var(--null); }
+.r-id { grid-area: id; font: 500 0.85rem var(--font-mono); }
+.r-tag { grid-area: tag; justify-self: end; font: 500 0.72rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.r-pos .r-tag { color: var(--pos); } .r-ref .r-tag { color: var(--find); } .r-null .r-tag, .r-nf .r-tag { color: var(--null); }
+.r-text { grid-area: text; }
+.r-text small { display: block; color: var(--ink-2); font-size: 0.8rem; margin-top: 2px; }
+.toc ul { margin: 0; padding-left: 1.2em; columns: 2 14rem; column-gap: 32px; }
+.toc li { break-inside: avoid; }
+.toc ul ul { columns: 1; padding-left: 1em; font-size: 0.92em; color: var(--ink-2); }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+.paper h1 { font-size: 1.55rem; margin: 2em 0 0.5em; padding-top: 0.6em; border-top: 1px solid var(--rule); }
+.paper p, .paper li { hyphens: auto; }
+.paper p { margin: 0 0 1em; }
+.paper .header-section-number { color: var(--accent); margin-right: 0.5em; font-family: var(--font-mono); font-size: 0.85em; font-weight: 500; }
+.paper blockquote { margin: 1.2em 0; padding: 10px 16px; border-left: 3px solid var(--rule); background: var(--quote);
+  border-radius: 0 6px 6px 0; font-size: 0.93rem; color: var(--ink-2); }
+figure { margin: 1.6em 0; display: flex; flex-direction: column; gap: 10px; }
+figure img { background: var(--plate); padding: 12px; border-radius: 6px; border: 1px solid var(--rule); max-width: 100%; height: auto; }
+figcaption, caption { font-size: 0.88rem; color: var(--ink-2); line-height: 1.45; text-align: left; }
+.paper table { display: block; overflow-x: auto; border-collapse: collapse; width: 100%; margin: 1.4em 0;
+  font: 400 0.78rem/1.45 var(--font-mono); font-variant-numeric: tabular-nums; }
+/* Code in table cells must not break per letter on phones; the table scrolls sideways instead. */
+.paper table code { overflow-wrap: normal; word-break: normal; white-space: nowrap; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+th { font-weight: 500; color: var(--ink-2); border-bottom-color: var(--ink-2); }
+#refs { width: 100%; max-width: none; font-size: 0.88rem; line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
+/* Author-year entries are plain text: full width with a hanging indent. The two-column grid is
+   only for numbered styles, where pandoc emits a .csl-left-margin label (otherwise the text
+   fell into the 2.6em label column and wrapped every word or two). */
+.csl-entry { display: block; min-width: 0; padding-left: 1.5em; text-indent: -1.5em;
+  overflow-wrap: anywhere; word-break: break-word; }
+.csl-entry:has(> .csl-left-margin) { display: grid; grid-template-columns: 2.6em minmax(0, 1fr);
+  padding-left: 0; text-indent: 0; }
+.csl-entry a { overflow-wrap: anywhere; word-break: break-all; }
+.csl-left-margin { color: var(--ink-2); font-family: var(--font-mono); font-size: 0.85em; }
+.cite { min-width: 0; }
+/* BibTeX keeps its lines intact (no mid-URL breaks); the block scrolls sideways on narrow screens. */
+.cite pre { overflow-x: auto; }
+.cite pre, .cite pre code { white-space: pre; overflow-wrap: normal; word-break: normal; }
+.colophon { border-top: 1px solid var(--rule); padding-top: 20px; color: var(--ink-2); font-size: 0.85rem; }
+.colophon p { margin: 0 0 0.7em; }
+/* Flex children default to min-width:auto, so one wide table or equation widened the whole page on phones. */
+.page > * { min-width: 0; }
+.byline a, .abstract-body a, .paper a { overflow-wrap: anywhere; }
+math[display="block"] { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+@media (max-width: 480px) { body { font-size: 16px; } .page { padding-block: 28px 48px; gap: 28px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="masthead">
+  <p class="kicker">Research paper · pre-registered</p>
+  <h1>Stablecoin Flows and Treasury-Bill Yields after the GENIUS Act: A Pre-Registered Replication-in-Spirit</h1>
+  <p class="byline">Thanatchon Chongmankhong · <a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act">github.com/thanatchon36/stablecoin-tbills-genius-act</a></p>
+  <p class="meta"><b>Pre-registered</b> · 11 fiat-backed USD stablecoins · 4 January 2021 to 29 October 2026 · 1,135 pre / 322 post business days · data vintage 31 October 2026</p>
+  <ul class="actions"><li><a href="paper.pdf">Download PDF</a></li><li><a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act">Code</a></li><li><a href="https://huggingface.co/datasets/thanatchon36/stablecoin-tbills-genius-act">Data</a></li><li><a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act/blob/main/docs/PAP.md">Pre-analysis plan</a></li><li><a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act/blob/main/docs/FINDINGS.md">Research log</a></li><li><a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act/blob/main/docs/SUMMARY_TH.md">สรุปภาษาไทย</a></li></ul>
+</header>
+<section class="abstract" aria-label="Abstract">
+  <h2>Abstract</h2>
+  <div class="abstract-body"><p>The GENIUS Act, signed into law on 18 July 2025, requires US payment-stablecoin issuers to hold reserves of cash, deposits, overnight repurchase agreements, government money market funds and Treasury securities maturing within 93 days. We ask whether the association between stablecoin flows and US Treasury-bill yields changed after enactment. Using daily supply of 11 fiat-backed USD stablecoins and secondary-market yields from 4 January 2021 to 29 October 2026, we estimate local projections with a post-enactment interaction, following a pre-analysis plan committed before any regression was run. Before enactment, a USD 10 bn five-day inflow is associated with a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.9 bp change in the 3-month yield after ten business days (90% CI <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>17.7 to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.1). After enactment the estimate is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.6 bp (90% CI <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>13.0 to +1.9); the difference, +5.3 bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">p=0.30</annotation></semantics></math>), has the opposite sign to our hypothesis and is not statistically distinguishable from zero. We find no post-enactment shift of the response towards the shortest maturities and no post-enactment dominance of outflows over inflows. A placebo break in July 2024 is larger and significant (+23.1 bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">p&lt;0.01</annotation></semantics></math>), so the relationship is unstable over time and no break can be attributed to the Act. The reserve rules bind only from January 2027 and the post-enactment sample is short, so the design has little power: the null is weak evidence of no change. Data, code and every number in this paper are reproducible from <a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act" class="uri">https://github.com/thanatchon36/stablecoin-tbills-genius-act</a>.</p>
+</div>
+</section>
+<section class="results" aria-label="Results at a glance">
+  <h2>Results at a glance</h2>
+  <p class="note">Pre-registered hypotheses; numbers generated from the results files.</p>
+  <ul class="result-list"><li class="r r-null"><span class="r-id">H1</span><span class="r-tag">not supported</span><span class="r-text">3-month yield per USD 10 bn inflow: −10.9 bp before, −5.6 bp after<small>h = 10; difference +5.3 bp (p = 0.30), opposite in sign to H1</small></span></li>
+<li class="r r-null"><span class="r-id">H2</span><span class="r-tag">not supported</span><span class="r-text">Short-end concentration predates the Act<small>pre: 4-week −14.8 bp down to 2-year 0.1 bp; no tenor&#x27;s change significant (all p ≥ 0.26)</small></span></li>
+<li class="r r-null"><span class="r-id">H3</span><span class="r-tag">not supported</span><span class="r-text">Outflow asymmetry absent after enactment<small>pre outflow +16.9 bp per USD 3.5 bn (p = 0.03); 321 of 412 outflow days fall in the 2022–23 hiking cycle</small></span></li>
+<li class="r r-ref"><span class="r-id">Placebo</span><span class="r-tag">unstable</span><span class="r-text">A July 2024 placebo break is larger: +23.1 bp (p &lt; 0.01)<small>no break in the association can be attributed to the Act</small></span></li>
+<li class="r r-null"><span class="r-id">Robustness</span><span class="r-tag">null holds</span><span class="r-text">10 pre-registered checks: change never significant<small>smallest p = 0.20; positive in 9 of 10</small></span></li>
+<li class="r r-ref"><span class="r-id">Power</span><span class="r-tag">low</span><span class="r-text">Minimum detectable change ≈ 15 bp per USD 10 bn<small>312 post-enactment observations at h = 10; reserve rules bind only from 2027</small></span></li></ul>
+</section>
+<nav class="toc" aria-label="Contents"><h2>Contents</h2>
+<ul>
+<li><a href="#sec:intro" id="toc-sec:intro"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#sec:background" id="toc-sec:background"><span class="toc-section-number">2</span> Institutional Background and Related Work</a></li>
+<li><a href="#sec:data" id="toc-sec:data"><span class="toc-section-number">3</span> Data</a></li>
+<li><a href="#sec:method" id="toc-sec:method"><span class="toc-section-number">4</span> Method</a></li>
+<li><a href="#sec:results" id="toc-sec:results"><span class="toc-section-number">5</span> Results</a></li>
+<li><a href="#sec:robustness" id="toc-sec:robustness"><span class="toc-section-number">6</span> Robustness, Placebo and Power</a></li>
+<li><a href="#sec:discussion" id="toc-sec:discussion"><span class="toc-section-number">7</span> Relation to Ahmed and Aldasoro (2025)</a></li>
+<li><a href="#sec:limits" id="toc-sec:limits"><span class="toc-section-number">8</span> Limitations</a></li>
+<li><a href="#sec:conclusion" id="toc-sec:conclusion"><span class="toc-section-number">9</span> Conclusion</a></li>
+<li><a href="#app:repro" id="toc-app:repro">Appendix A: Reproducibility</a></li>
+<li><a href="#app:universe" id="toc-app:universe">Appendix B: Stablecoin Universe</a></li>
+<li><a href="#app:deviations" id="toc-app:deviations">Appendix C: Deviations from the Pre-Analysis Plan</a></li>
+</ul>
+</nav>
+<article class="paper">
+<h1 data-number="1" id="sec:intro"><span class="header-section-number">1</span> Introduction</h1>
+<p>Fiat-backed stablecoins hold most of their reserves in short-dated US government debt. With aggregate supply of the coins we study near USD 267 bn at the end of our sample, their issuers have become a visible class of buyer at the very front of the Treasury curve. The Bank for International Settlements (BIS) notes that their Treasury holdings are now “on par with large jurisdictions and government money market funds” and that a USD 3.5 bn increase in stablecoin market capitalisation “can already depress Treasury yields by around 2.5–5 basis points” <span class="citation" data-cites="bis2025aer">[1]</span>. That estimate comes from Ahmed and Aldasoro <span class="citation" data-cites="ahmed2025">[2]</span>, who document the flow–yield association with local projections and identify it with an instrument.</p>
+<p>On 18 July 2025 the United States enacted the GENIUS Act <span class="citation" data-cites="genius2025">[3]</span>. It turns the composition of stablecoin reserves from an issuer choice into a legal requirement, and among Treasury securities it admits only those maturing within 93 days. If stablecoin demand moves bill yields, codifying that demand could plausibly strengthen the channel, by making reserve purchases more mechanical, or concentrate it at the shortest maturities.</p>
+<p>This paper asks whether the data so far show either. The question is narrow, and so is the design: a replication-in-spirit of the controls-only local projections of <span class="citation" data-cites="ahmed2025">[2]</span>, extended with an interaction for the post-enactment regime and estimated on open data. To limit researcher degrees of freedom we committed a pre-analysis plan (PAP) with hypotheses, specification, robustness list and decision rules before downloading any yield data. A null result was declared publishable in advance.</p>
+<h4 class="unnumbered" id="hypotheses">Hypotheses</h4>
+<p>Writing <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math> for the response of the yield to an inflow (negative if inflows lower yields), the PAP states: <strong>H1</strong>: at horizon <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><msup><mi>β</mi><mrow><mi>p</mi><mi>o</mi><mi>s</mi><mi>t</mi></mrow></msup><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mo stretchy="false" form="prefix">|</mo><msup><mi>β</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi></mrow></msup><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|\beta^{post}|&gt;|\beta^{pre}|</annotation></semantics></math> for the 3-month bill; <strong>H2</strong>: after enactment the response is concentrated at the 4-week and 3-month tenors, and is flatter across tenors before; <strong>H3</strong>: outflows move yields more than inflows of the same size, in both regimes.</p>
+<h4 class="unnumbered" id="findings">Findings</h4>
+<p>None of the three hypotheses is supported after enactment. The post-enactment response of the 3-month yield is about half the pre-enactment one, not larger, and the difference is imprecise. The short-end concentration of H2 is already present before enactment. The outflow asymmetry of H3 appears before enactment, where it is plausibly driven by rate-motivated redemptions during the 2022–23 tightening cycle, but not after. A pre-registered placebo break shows that the flow–yield association shifts between sub-periods even without any legislative event.</p>
+<h4 class="unnumbered" id="contributions">Contributions</h4>
+<p>(i) A legally dated regime break, rather than a market-size proxy, for the stablecoin–bill channel; (ii) a term-structure test motivated by the 93-day rule; (iii) a post-enactment sample extending seven months beyond that of <span class="citation" data-cites="ahmed2025">[2]</span>; and (iv) a fully reproducible, pre-registered pipeline in which every number in the text is generated from versioned results files.</p>
+<h1 data-number="2" id="sec:background"><span class="header-section-number">2</span> Institutional Background and Related Work</h1>
+<h4 class="unnumbered" id="the-genius-act">The GENIUS Act</h4>
+<p>The Guiding and Establishing National Innovation for U.S. Stablecoins Act (S. 1582) passed the Senate on 17 June 2025 and the House on 17 July 2025, and was signed on 18 July 2025 as Public Law 119-27 <span class="citation" data-cites="genius2025">[3]</span>. Section 4(a)(1)(A) requires a permitted issuer to hold identifiable reserves at least one-for-one, comprising US currency and Federal Reserve balances; demand deposits at insured institutions; “Treasury bills, notes, or bonds (I) with a remaining maturity of 93 days or less; or (II) issued with a maturity of 93 days or less”; overnight repurchase and reverse repurchase agreements backed by Treasuries; government money market funds invested in these assets; other similarly liquid federal assets approved by the regulator; and tokenised forms of the above. The 93-day limit is therefore a ceiling on the maturity of eligible Treasuries, not a mandate to hold bills: an issuer can meet the rule entirely with deposits or repo.</p>
+<p>Under §20 the Act takes effect on the earlier of 18 months after enactment (18 January 2027) or 120 days after final implementing regulations. The Office of the Comptroller of the Currency issued its final rule on 21 October 2026 with an effective date of 18 January 2027 <span class="citation" data-cites="occ2026">[4]</span>. Throughout our post-enactment sample the reserve requirements were therefore known but not yet binding. “Post” in this paper denotes an <em>anticipation</em> regime.</p>
+<h4 class="unnumbered" id="stablecoins-and-safe-asset-prices">Stablecoins and safe-asset prices</h4>
+<p>Ahmed and Aldasoro <span class="citation" data-cites="ahmed2025">[2]</span> estimate the effect of stablecoin flows on Treasury yields with local projections <span class="citation" data-cites="jorda2005">[5]</span>. The first version (May 2025) instruments flows with crypto-market shocks, reports that a two-standard-deviation inflow lowers 3-month yields by 2–2.5 bp within ten days, and finds outflows raise yields two to three times as much as inflows lower them. The BIS figures quoted above (2.5–5 bp per USD 3.5 bn, up to three times larger in redemption episodes) <span class="citation" data-cites="bis2025aer">[1]</span> predate the revision and draw on this version. The revised version (June 2026) uses a granular instrument across stablecoin–blockchain pairs, a sample from January 2021 to March 2026 and a larger set of controls. It reports <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.71</mn></mrow><annotation encoding="application/x-tex">-0.71</annotation></semantics></math> bp on impact and about <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4</mn></mrow><annotation encoding="application/x-tex">-4</annotation></semantics></math> bp within ten days per USD 3.5 bn. Its controls-only local projection, the specification closest to ours, gives less than 1 bp within ten days and is not significant. The revision reports no asymmetry result and, in its footnote 25, does not use GENIUS passage as an event.</p>
+<h4 class="unnumbered" id="why-maturity-matters">Why maturity matters</h4>
+<p>In preferred-habitat models of the term structure <span class="citation" data-cites="vayanos2021">[6]</span>, demand from investors anchored to a maturity segment moves yields in that segment most, with arbitrage transmitting part of the effect to neighbouring maturities. A rule confining stablecoin Treasury demand to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>≤</mo><annotation encoding="application/x-tex">\leq</annotation></semantics></math>93 days thus predicts the pattern tested by H2.</p>
+<h1 data-number="3" id="sec:data"><span class="header-section-number">3</span> Data</h1>
+<h4 class="unnumbered" id="stablecoin-supply">Stablecoin supply</h4>
+<p>Daily circulating supply comes from the DefiLlama stablecoins API <span class="citation" data-cites="defillama">[7]</span>, with coin identifiers looked up by symbol. The primary aggregate <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math> sums 11 fiat-backed payment stablecoins (Table <a href="#tab:universe" data-reference-type="ref" data-reference="tab:universe">6</a>): USDT, USDC, FDUSD, PYUSD, TUSD, USDP, BUSD (defunct, history retained), RLUSD, and three coins added under a rule fixed in the PAP (fiat-backed and above USD 1 bn): USD1, USDG and USDGO. Tokenised money market funds (e.g. BUIDL) and crypto-collateralised or synthetic dollars (DAI/USDS, USDe) are excluded: the former are fund shares rather than payment stablecoins, and the latter are not backed by the cash-and-Treasury reserves that the Act regulates. Short gaps in a coin’s series (up to three days) are forward-filled; across longer gaps the coin is excluded from the aggregate. The total of all USD-pegged coins reported by DefiLlama serves as a robustness aggregate.</p>
+<h4 class="unnumbered" id="timing">Timing</h4>
+<p>A DefiLlama snapshot dated <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math> is taken at 00:00 UTC and therefore measures supply at the end of US trading day <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d-1</annotation></semantics></math>; we assign it accordingly. Assigning it to day <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math> is a pre-registered robustness check.</p>
+<h4 class="unnumbered" id="yields-and-controls">Yields and controls</h4>
+<p>From FRED <span class="citation" data-cites="fred">[8]</span> we take secondary-market Treasury-bill yields (4-week, 3-month, 6-month), constant-maturity 1- and 2-year yields, the effective federal funds rate, VIX, the S&amp;P 500 index and the Federal Reserve’s overnight reverse repo (ON RRP) volume. Yields are converted to basis points. The bitcoin closing price comes from Binance. All files are cached with download timestamps (vintage 31 October 2026) and never edited by hand.</p>
+<h4 class="unnumbered" id="sample">Sample</h4>
+<p>The calendar is the set of US business days on which the 3-month bill yield is published. The estimation sample runs from 4 January 2021 to 29 October 2026: 1,135 business days before enactment and 322 after (312 at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>). After alignment no regression variable has missing values. Fig. <a href="#fig:data" data-reference-type="ref" data-reference="fig:data">1</a> shows the series and Table <a href="#tab:stats" data-reference-type="ref" data-reference="tab:stats">1</a> the summary statistics.</p>
+<figure id="fig:data" data-latex-placement="!t">
+<img src="figures/fig_data.png" alt="" />
+<figcaption>(a) Circulating supply of the 11 fiat-backed USD stablecoins, by coin. (b) Secondary-market yields on 4-week and 3-month Treasury bills. Daily, 4 January 2021 to 29 October 2026. Dotted lines: Terra depeg (9 May 2022), FTX collapse (8 Nov 2022), SVB closure (10 Mar 2023); solid line: GENIUS Act signed (18 Jul 2025). Sources: DefiLlama, FRED.</figcaption>
+</figure>
+<p>The two regimes differ in ways that matter for interpretation. After enactment the average five-day inflow is smaller (USD 0.59 bn against 0.90 bn) while its standard deviation is similar (1.91 against 1.77). Supply is about twice as large on average (USD 268 bn against 135 bn). Daily changes in the 3-month yield are less volatile (standard deviation 2.07 bp against 3.73 bp). ON RRP balances, a cushion of short-term liquidity before enactment (mean USD 1087 bn), average only USD 14 bn afterwards.</p>
+<div id="tab:stats">
+<table>
+<caption>Summary statistics: mean (standard deviation)</caption>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Pre (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>1135</mn></mrow><annotation encoding="application/x-tex">N=1135</annotation></semantics></math>)</th>
+<th style="text-align: right;">Post (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>322</mn></mrow><annotation encoding="application/x-tex">N=322</annotation></semantics></math>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">5-day flow <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mi>t</mi></msub><annotation encoding="application/x-tex">F_t</annotation></semantics></math> (USD bn)</td>
+<td style="text-align: right;">0.90 (1.77)</td>
+<td style="text-align: right;">0.59 (1.91)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Supply <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_t</annotation></semantics></math> (USD bn)</td>
+<td style="text-align: right;">135.47 (39.38)</td>
+<td style="text-align: right;">267.70 (11.98)</td>
+</tr>
+<tr>
+<td style="text-align: left;">3-month bill yield (bp)</td>
+<td style="text-align: right;">316.80 (214.73)</td>
+<td style="text-align: right;">377.02 (19.58)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Daily <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> 3-month yield (bp)</td>
+<td style="text-align: right;">0.37 (3.73)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>0.07 (2.07)</td>
+</tr>
+<tr>
+<td style="text-align: left;">2-year CMT yield (bp)</td>
+<td style="text-align: right;">316.13 (174.94)</td>
+<td style="text-align: right;">388.96 (40.64)</td>
+</tr>
+<tr>
+<td style="text-align: left;">VIX</td>
+<td style="text-align: right;">19.58 (5.43)</td>
+<td style="text-align: right;">17.69 (3.12)</td>
+</tr>
+<tr>
+<td style="text-align: left;">ON RRP (USD bn)</td>
+<td style="text-align: right;">1087.20 (819.77)</td>
+<td style="text-align: right;">14.09 (34.77)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 data-number="4" id="sec:method"><span class="header-section-number">4</span> Method</h1>
+<h4 class="unnumbered" id="specification">Specification</h4>
+<p>For horizons <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>…</mi><mo>,</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">h=0,\dots,20</annotation></semantics></math> business days we estimate the local projection <span class="citation" data-cites="jorda2005">[5]</span> <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mi>h</mi></mrow></msub><mo>−</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>α</mi><mi>h</mi></msub><mo>+</mo><msub><mi>β</mi><mi>h</mi></msub><msub><mi>F</mi><mi>t</mi></msub><mo>+</mo><msub><mi>δ</mi><mi>h</mi></msub><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">(</mo><msub><mi>F</mi><mi>t</mi></msub><mo>×</mo><msub><mrow><mi>𝑃</mi><mi>𝑜</mi><mi>𝑠</mi><mi>𝑡</mi></mrow><mi>t</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>+</mi><msub><mi>γ</mi><mi>h</mi></msub><msub><mrow><mi>𝑃</mi><mi>𝑜</mi><mi>𝑠</mi><mi>𝑡</mi></mrow><mi>t</mi></msub><mo>+</mo><msubsup><mi mathvariant="normal">Γ</mi><mi>h</mi><mo>′</mo></msubsup><msub><mi>X</mi><mi>t</mi></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>t</mi><mo>+</mo><mi>h</mi></mrow></msub><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{multline}
+\tag{1}
+y_{t+h}-y_{t-1} = \alpha_h + \beta_h F_t + \delta_h\,(F_t\times \mathit{Post}_t) \\ + \gamma_h \mathit{Post}_t + \Gamma_h&#39; X_t + \varepsilon_{t+h},
+\end{multline}</annotation></semantics></math> where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>t</mi></msub><annotation encoding="application/x-tex">y_t</annotation></semantics></math> is the 3-month bill yield in basis points, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mi>t</mi></msub><mo>=</mo><msub><mi>S</mi><mi>t</mi></msub><mo>−</mo><msub><mi>S</mi><mrow><mi>t</mi><mo>−</mo><mn>5</mn></mrow></msub></mrow><annotation encoding="application/x-tex">F_t=S_t-S_{t-5}</annotation></semantics></math> is the five-business-day change in aggregate supply in USD bn, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>𝑃</mi><mi>𝑜</mi><mi>𝑠</mi><mi>𝑡</mi></mrow><mi>t</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mathit{Post}_t=1</annotation></semantics></math> from 18 July 2025. The pre-enactment response is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>h</mi></msub><annotation encoding="application/x-tex">\beta_h</annotation></semantics></math>, the post-enactment response <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>h</mi></msub><mo>+</mo><msub><mi>δ</mi><mi>h</mi></msub></mrow><annotation encoding="application/x-tex">\beta_h+\delta_h</annotation></semantics></math>, and the test of a change is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>h</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta_h=0</annotation></semantics></math>. The primary horizon is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>. Coefficients are reported per USD 10 bn of five-day flow. For comparison with <span class="citation" data-cites="ahmed2025">[2]</span> we also report them per USD 3.5 bn (about two standard deviations of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mi>t</mi></msub><annotation encoding="application/x-tex">F_t</annotation></semantics></math>) and per one standard deviation (USD 1.81 bn).</p>
+<h4 class="unnumbered" id="controls">Controls</h4>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>t</mi></msub><annotation encoding="application/x-tex">X_t</annotation></semantics></math> contains lags 1–5 of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>y</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\Delta y_t</annotation></semantics></math> and of the daily flow <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>S</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\Delta S_t</annotation></semantics></math>, and same-day changes in the 2-year yield (a proxy for policy expectations, omitted when the 2-year yield is the outcome), VIX, bitcoin and S&amp;P 500 log returns and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mrow><mi mathvariant="normal">log</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mtext mathvariant="normal">ON RRP</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Delta\log(1+\text{ON RRP})</annotation></semantics></math>. Same-day controls could themselves respond to flows, but they also absorb common risk and policy news. We therefore also report a lags-only version.</p>
+<h4 class="unnumbered" id="inference">Inference</h4>
+<p>Standard errors are Newey–West <span class="citation" data-cites="neweywest1987">[9]</span> with a Bartlett kernel and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">h+1</annotation></semantics></math> lags, which accounts for the overlap of the dependent variable across days. Lag-augmented local projections, as here, are known to give valid inference over a wide range of persistence <span class="citation" data-cites="montiel2021">[10]</span>; we nevertheless use the pre-registered autocorrelation-robust errors. Bands in the figures are 68% and 90%. We make no correction for multiple testing across 5 tenors and 21 horizons; inference focuses on the pre-registered <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math> and on the shape of the whole response.</p>
+<h4 class="unnumbered" id="secondary-specifications">Secondary specifications</h4>
+<p>(i) <em>Term structure</em>: Eq. (1) with the 4-week, 6-month, 1-year and 2-year yields as outcomes. (ii) <em>Asymmetry</em>: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mi>t</mi></msub><annotation encoding="application/x-tex">F_t</annotation></semantics></math> is replaced by <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>F</mi><mi>t</mi><mo>+</mo></msubsup><mo>=</mo><mrow><mi mathvariant="normal">max</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>F</mi><mi>t</mi></msub><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">F^+_t=\max(F_t,0)</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>F</mi><mi>t</mi><mo>−</mo></msubsup><mo>=</mo><mrow><mi mathvariant="normal">min</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>F</mi><mi>t</mi></msub><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">F^-_t=\min(F_t,0)</annotation></semantics></math>, each interacted with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi>𝑃</mi><mi>𝑜</mi><mi>𝑠</mi><mi>𝑡</mi></mrow><mi>t</mi></msub><annotation encoding="application/x-tex">\mathit{Post}_t</annotation></semantics></math>. The response to a USD 3.5 bn outflow is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>3.5</mn><mspace width="0.167em"></mspace><msup><mi>β</mi><mo>−</mo></msup></mrow><annotation encoding="application/x-tex">-3.5\,\beta^-</annotation></semantics></math>, so a positive number means outflows raise yields, and a Wald test compares <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>β</mi><mo>−</mo></msup><annotation encoding="application/x-tex">\beta^-</annotation></semantics></math> with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>β</mi><mo>+</mo></msup><annotation encoding="application/x-tex">\beta^+</annotation></semantics></math> within each regime. (iii) <em>Spread</em>: the 3-month bill yield minus the effective federal funds rate, to separate bill-specific pricing from policy-rate expectations.</p>
+<h4 class="unnumbered" id="pre-registration">Pre-registration</h4>
+<p>The PAP (<code>docs/PAP.md</code>) was committed to the repository before any yield data were downloaded or any regression was run. It fixes the hypotheses, the universe rule, timing, Eq. (1), the primary horizon, the secondary specifications, a closed list of ten robustness checks and the decision rules. Among the rules: null or opposite-signed results are reported as the headline; no instrumental-variable strategy is attempted; and the primary specification is never changed. One amendment to the plan, made before any regression, and one later correction to a descriptive table are listed in Appendix <a href="#app:deviations">C</a>. No analysis in this paper is post hoc.</p>
+<h4 class="unnumbered" id="use-of-generative-ai">Use of generative AI</h4>
+<p>The study was carried out with Claude (Anthropic), operated through the Claude Code agent. Working from the author’s written brief, which specified the research question, hypotheses, design, data sources, decision rules and quality bar, the agent wrote the pre-analysis plan and the code, downloaded and processed the data, ran the estimations, produced the figures and tables, and drafted this manuscript. The author directed the work, reviewed its outputs and takes sole responsibility for the content. Every number in the text is generated by code from versioned results files rather than typed, which limits one class of transcription error but not errors of design or interpretation.</p>
+<h1 data-number="5" id="sec:results"><span class="header-section-number">5</span> Results</h1>
+<h2 data-number="5.1" id="primary-specification-h1"><span class="header-section-number">5.1</span> Primary specification (H1)</h2>
+<p>Before enactment, a USD 10 bn five-day inflow is associated with a 3-month yield <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.9 bp lower after ten business days (s.e. 4.2; 90% CI <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>17.7 to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.1). After enactment the estimate is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.6 bp (s.e. 4.5; 90% CI <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>13.0 to +1.9; <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.22</mn></mrow><annotation encoding="application/x-tex">p=0.22</annotation></semantics></math>). The difference is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>=</mo><mi>+</mi><mn>5.3</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{10}=+5.3{}</annotation></semantics></math> bp (s.e. 5.2, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">p=0.30</annotation></semantics></math>). It is not statistically distinguishable from zero, and its sign is opposite to H1, which predicts <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta_{10}&lt;0</annotation></semantics></math> (Table <a href="#tab:primary" data-reference-type="ref" data-reference="tab:primary">2</a>). At the scale of <span class="citation" data-cites="ahmed2025">[2]</span> the estimates are <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.8 bp before and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.9 bp after enactment per USD 3.5 bn; per standard deviation of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mi>t</mi></msub><annotation encoding="application/x-tex">F_t</annotation></semantics></math> they are <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>2.0 and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.0 bp. Dropping the same-day controls changes nothing material (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>=</mo><mi>+</mi><mn>5.4</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{10}=+5.4{}</annotation></semantics></math> bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.31</mn></mrow><annotation encoding="application/x-tex">p=0.31</annotation></semantics></math>). <strong>H1 is not supported.</strong></p>
+<p>Fig. <a href="#fig:irf" data-reference-type="ref" data-reference="fig:irf">2</a> shows the full responses. Before enactment the response builds steadily, reaching <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>23.9 bp at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">h=20</annotation></semantics></math>. After enactment it bottoms out at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>7.4 bp at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>13</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">h=13{}</annotation></semantics></math> and then fades towards zero. The gap widens with the horizon (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>20</mn></msub><mo>=</mo><mi>+</mi><mn>19.6</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{20}=+19.6{}</annotation></semantics></math> bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.08</mn></mrow><annotation encoding="application/x-tex">p=0.08</annotation></semantics></math>). No single horizon is significant at the 5% level, and adjacent horizons are highly correlated by construction.</p>
+<figure id="fig:irf" data-latex-placement="!t">
+<img src="figures/fig_irf.png" alt="" />
+<figcaption>Response of the 3-month bill yield to a USD 10 bn five-day stablecoin inflow, before and after the GENIUS Act (Eq. 1). Lines: point estimates; shaded: 68% and 90% Newey–West bands. Dotted line: the pre-registered horizon <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>.</figcaption>
+</figure>
+<div id="tab:primary">
+<table>
+<caption>Primary local projection: 3-month Treasury bill (pre-registered)</caption>
+<tbody>
+<tr>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: center;">Pre-enactment <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>h</mi></msub><annotation encoding="application/x-tex">\beta_h</annotation></semantics></math></td>
+<td colspan="2" style="text-align: center;">Post-enactment <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>h</mi></msub><mo>+</mo><msub><mi>δ</mi><mi>h</mi></msub></mrow><annotation encoding="application/x-tex">\beta_h+\delta_h</annotation></semantics></math></td>
+<td colspan="2" style="text-align: center;">Difference <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>h</mi></msub><annotation encoding="application/x-tex">\delta_h</annotation></semantics></math></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Horizon, scaling</td>
+<td style="text-align: right;">est. (s.e.)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></td>
+<td style="text-align: right;">est. (s.e.)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></td>
+<td style="text-align: right;">est. (s.e.)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">N_{pre}</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mrow><mi>p</mi><mi>o</mi><mi>s</mi><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">N_{post}</annotation></semantics></math></td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">h=0</annotation></semantics></math>, per USD 10 bn</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>0.95 (1.25)</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>0.45 (1.24)</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">+0.50 (0.80)</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">322</td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">h=5</annotation></semantics></math>, per USD 10 bn</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.28 (2.70)</td>
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.98 (3.53)</td>
+<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">+2.29 (3.00)</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">317</td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, per USD 10 bn</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.90 (4.16)</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.56 (4.54)</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">+5.35 (5.21)</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">312</td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">h=20</annotation></semantics></math>, per USD 10 bn</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>23.88 (8.69)</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.31 (7.95)</td>
+<td style="text-align: right;">0.59</td>
+<td style="text-align: right;">+19.57 (11.02)</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">302</td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, per 1 s.d. (USD 1.81 bn)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.97 (0.75)</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.01 (0.82)</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">+0.97 (0.94)</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">312</td>
+</tr>
+<tr>
+<td style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, per USD 3.5 bn</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.82 (1.45)</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.94 (1.59)</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">+1.87 (1.82)</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1135</td>
+<td style="text-align: right;">312</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Dependent variable: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mi>h</mi></mrow></msub><mo>−</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">y_{t+h}-y_{t-1}</annotation></semantics></math> in bp. Coefficients scaled to the stated flow size; Newey–West standard errors (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">h+1</annotation></semantics></math> lags) in parentheses; two-sided <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>-values. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mrow><mi>p</mi><mi>o</mi><mi>s</mi><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">N_{post}</annotation></semantics></math> falls with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math> because leads run to the end of the sample.</p>
+<h2 data-number="5.2" id="term-structure-h2"><span class="header-section-number">5.2</span> Term structure (H2)</h2>
+<p>Before enactment the ten-day response shrinks with maturity: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>14.8 bp at 4 weeks, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.9 at 3 months, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.6 at 6 months, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.7 at 1 year and 0.1 at 2 years (Fig. <a href="#fig:term" data-reference-type="ref" data-reference="fig:term">3</a>, Table <a href="#tab:term" data-reference-type="ref" data-reference="tab:term">3</a>). Only the 3-month estimate is significant at 5% (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">p=0.01</annotation></semantics></math>; 4-week <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.12</mn></mrow><annotation encoding="application/x-tex">p=0.12</annotation></semantics></math>). The gradient is consistent with preferred-habitat demand <span class="citation" data-cites="vayanos2021">[6]</span>, but it was already present before the Act. After enactment every tenor is smaller in absolute value and imprecise, and no tenor’s <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math> is significant (all <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>≥</mo><mn>0.26</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">p\geq0.26{}</annotation></semantics></math>). <strong>H2 is not supported.</strong></p>
+<figure id="fig:term" data-latex-placement="!t">
+<img src="figures/fig_term.png" alt="" />
+<figcaption>Ten-day response <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\beta_{10}</annotation></semantics></math> by tenor, per USD 10 bn five-day inflow, with 90% Newey–West intervals. Shaded: maturities eligible as reserves under §4(a)(1)(A)(iii). Bills are secondary-market yields; 1- and 2-year yields are constant-maturity.</figcaption>
+</figure>
+<div id="tab:term">
+<table>
+<caption>Term structure of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\beta_{10}</annotation></semantics></math> (bp per USD 10 bn, s.e.)</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Tenor</th>
+<th style="text-align: right;">Pre <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\beta_{10}</annotation></semantics></math></th>
+<th style="text-align: right;">Post</th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math></th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">4-week bill</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>14.78 (9.44)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.22 (7.75)</td>
+<td style="text-align: right;">+11.55 (10.18)</td>
+<td style="text-align: right;">0.26</td>
+</tr>
+<tr>
+<td style="text-align: left;">3-month bill</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.90 (4.16)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.56 (4.54)</td>
+<td style="text-align: right;">+5.35 (5.21)</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr>
+<td style="text-align: left;">6-month bill</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.56 (4.43)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>0.84 (5.33)</td>
+<td style="text-align: right;">+4.73 (5.87)</td>
+<td style="text-align: right;">0.42</td>
+</tr>
+<tr>
+<td style="text-align: left;">1-year CMT</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.65 (5.74)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.60 (7.71)</td>
+<td style="text-align: right;">+3.05 (8.62)</td>
+<td style="text-align: right;">0.72</td>
+</tr>
+<tr>
+<td style="text-align: left;">2-year CMT</td>
+<td style="text-align: right;">0.14 (9.14)</td>
+<td style="text-align: right;">2.22 (9.35)</td>
+<td style="text-align: right;">+2.08 (10.72)</td>
+<td style="text-align: right;">0.85</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 data-number="5.3" id="asymmetry-h3"><span class="header-section-number">5.3</span> Asymmetry (H3)</h2>
+<p>Before enactment, outflows are associated with much larger yield moves than inflows (Fig. <a href="#fig:asym" data-reference-type="ref" data-reference="fig:asym">4</a>, Table <a href="#tab:asym" data-reference-type="ref" data-reference="tab:asym">4</a>). Per USD 3.5 bn at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, an inflow is associated with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.6 bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">p=0.30</annotation></semantics></math>) and an outflow with +16.9 bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">p=0.03</annotation></semantics></math>); equal slopes are rejected at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.07</mn></mrow><annotation encoding="application/x-tex">p=0.07</annotation></semantics></math>. This matches the direction of the first version of <span class="citation" data-cites="ahmed2025">[2]</span>. The magnitude, however, is implausible: +44.3 bp at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">h=20</annotation></semantics></math>. Of the 412 pre-enactment outflow days, 321 fall in 2022–23, when the Federal Reserve was raising rates. Stablecoins pay no interest, so rising rates plausibly caused both the redemptions and the rise in yields. We read this asymmetry as rate-driven redemption, not fire-sale price impact.</p>
+<p>After enactment an inflow is associated with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.9 bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">p=0.01</annotation></semantics></math>) and an outflow with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.7 bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.28</mn></mrow><annotation encoding="application/x-tex">p=0.28</annotation></semantics></math>): outflows are associated with <em>lower</em>, not higher, yields. The equal-slope test rejects (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">p=0.05</annotation></semantics></math>) because the signs differ, not because outflows dominate. <strong>H3 is not supported after enactment.</strong></p>
+<figure id="fig:asym" data-latex-placement="!t">
+<img src="figures/fig_asym.png" alt="" />
+<figcaption>Response of the 3-month bill yield to a USD 3.5 bn five-day inflow (a, b) and outflow (c, d), before and after enactment. A positive outflow response means outflows raise yields. Rows share a vertical scale; 68% and 90% Newey–West bands.</figcaption>
+</figure>
+<div id="tab:asym">
+<table>
+<caption>Asymmetry: response to a USD 3.5 bn flow (bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>)</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Regime</th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math></th>
+<th style="text-align: right;">Inflow (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>)</th>
+<th style="text-align: right;">Outflow (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>)</th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>β</mi><mo>−</mo></msup><mo>=</mo><msup><mi>β</mi><mo>+</mo></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">p(\beta^-{=}\beta^+)</annotation></semantics></math></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Pre</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>0.9 (0.41)</td>
+<td style="text-align: right;">+5.0 (0.16)</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>1.6 (0.30)</td>
+<td style="text-align: right;">+16.9 (0.03)</td>
+<td style="text-align: right;">0.07</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>2.4 (0.37)</td>
+<td style="text-align: right;">+44.3 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>0.01)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>0.01</td>
+</tr>
+<tr>
+<td style="text-align: left;">Post</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>2.6 (0.11)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.2 (0.13)</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.9 (0.01)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.7 (0.28)</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.1 (0.11)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.2 (0.50)</td>
+<td style="text-align: right;">0.22</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Inflow <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>3.5</mn><mspace width="0.167em"></mspace><msup><mi>β</mi><mo>+</mo></msup></mrow><annotation encoding="application/x-tex">=3.5\,\beta^+</annotation></semantics></math>; outflow <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mi>−</mi><mn>3.5</mn><mspace width="0.167em"></mspace><msup><mi>β</mi><mo>−</mo></msup></mrow><annotation encoding="application/x-tex">=-3.5\,\beta^-</annotation></semantics></math>. Last column: Wald test of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>β</mi><mo>−</mo></msup><mo>=</mo><msup><mi>β</mi><mo>+</mo></msup></mrow><annotation encoding="application/x-tex">\beta^-=\beta^+</annotation></semantics></math> within the regime.</p>
+<h2 data-number="5.4" id="billpolicy-rate-spread"><span class="header-section-number">5.4</span> Bill–policy-rate spread</h2>
+<p>For the 3-month bill yield minus the effective federal funds rate, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>=</mo><mi>−</mi><mn>6.2</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{10}=\ensuremath{-}6.2{}</annotation></semantics></math> bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.46</mn></mrow><annotation encoding="application/x-tex">p=0.46</annotation></semantics></math>). Neither regime is significant (pre 4.1 bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.54</mn></mrow><annotation encoding="application/x-tex">p=0.54</annotation></semantics></math>; post <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>2.1 bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.75</mn></mrow><annotation encoding="application/x-tex">p=0.75</annotation></semantics></math>). The association with the bill yield is therefore not visible in the spread. This is consistent with the bill-yield association reflecting policy-rate expectations rather than a bill-specific scarcity premium, which would also explain why the controls-only estimate is larger than the instrumented one (Section <a href="#sec:discussion" data-reference-type="ref" data-reference="sec:discussion">7</a>).</p>
+<h1 data-number="6" id="sec:robustness"><span class="header-section-number">6</span> Robustness, Placebo and Power</h1>
+<h4 class="unnumbered" id="pre-registered-checks">Pre-registered checks</h4>
+<p>Table <a href="#tab:robust" data-reference-type="ref" data-reference="tab:robust">5</a> and Fig. <a href="#fig:robust" data-reference-type="ref" data-reference="fig:robust">5</a> report the closed list of ten robustness checks next to the baseline: a break at Senate passage; a placebo break; dropping <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>±</mi><annotation encoding="application/x-tex">\pm</annotation></semantics></math>10 business days around the Terra, FTX and SVB episodes; USDT-only and USDC-only flows; the all-USD-pegged aggregate; the one-day timing shift; flow windows of one and ten days; and lags-only controls. Across the 10 non-placebo rows <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math> is never significant (smallest <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">p=0.20</annotation></semantics></math>) and is positive in 9 of them. The exception is USDT-only flows, where the post-enactment response is larger (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>13.5 against <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.7 bp; <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>=</mo><mi>−</mi><mn>2.8</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{10}=\ensuremath{-}2.8{}</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.71</mn></mrow><annotation encoding="application/x-tex">p=0.71</annotation></semantics></math>). The post-enactment response is individually significant only with the all-USD-pegged aggregate (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>9.2 bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.04</mn></mrow><annotation encoding="application/x-tex">p=0.04</annotation></semantics></math>) and the ten-day window (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>8.0 bp, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">p&lt;0.01</annotation></semantics></math>).</p>
+<h4 class="unnumbered" id="placebo">Placebo</h4>
+<p>A break on 18 July 2024, estimated on data ending before Senate passage, gives <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mn>10</mn></msub><mo>=</mo><mi>+</mi><mn>23.1</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">\delta_{10}=+23.1{}</annotation></semantics></math> bp (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">p&lt;0.01</annotation></semantics></math>), with a “post” response of 9.6 bp. The flow–yield association thus shifts by more than the GENIUS-Act difference between two sub-periods separated by no legislative event. Even a significant <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math> at enactment could not have been attributed to the Act on this evidence, and the instability is itself a finding: the controls-only association is not a stable structural parameter.</p>
+<h4 class="unnumbered" id="power">Power</h4>
+<p>With 312 post-enactment observations at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, the standard error of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math> is 5.2 bp. The minimum detectable difference at 80% power and a two-sided 5% test is therefore about <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2.8</mn><mo>×</mo><mn>5.2</mn><mrow></mrow><mo>≈</mo><mn>15</mn><mrow></mrow></mrow><annotation encoding="application/x-tex">2.8\times5.2{}\approx15{}</annotation></semantics></math> bp per USD 10 bn, roughly 1.3 times the entire pre-enactment estimate. A doubling of the response would have been hard to detect. The null is weak evidence of no change.</p>
+<figure id="fig:robust" data-latex-placement="!t">
+<img src="figures/fig_robust.png" alt="" />
+<figcaption>Pre-registered robustness: the change at enactment <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>10</mn></msub><annotation encoding="application/x-tex">\delta_{10}</annotation></semantics></math> (post minus pre, bp per USD 10 bn of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-day flow) with 90% Newey–West intervals. Diamond: baseline. Square: placebo break on 18 July 2024, estimated on data ending 16 June 2025.</figcaption>
+</figure>
+<div id="tab:robust">
+<table>
+<caption>Robustness (pre-registered): 3-month bill, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, estimate (s.e.)</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Specification (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, per USD 10 bn)</th>
+<th style="text-align: right;">Pre <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math></th>
+<th style="text-align: right;">Post <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>+</mo><mi>δ</mi></mrow><annotation encoding="application/x-tex">\beta+\delta</annotation></semantics></math></th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math></th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">p(\delta)</annotation></semantics></math></th>
+<th style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">N_{pre}</annotation></semantics></math> / <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mrow><mi>p</mi><mi>o</mi><mi>s</mi><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">N_{post}</annotation></semantics></math></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Baseline (primary spec)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.90 (4.16)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.56 (4.54)</td>
+<td style="text-align: right;">+5.35 (5.21)</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">Alternative break 2025-06-17 (Senate)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.89 (4.19)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.86 (4.50)</td>
+<td style="text-align: right;">+6.03 (5.18)</td>
+<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">1114 / 333</td>
+</tr>
+<tr>
+<td style="text-align: left;">Placebo break 2024-07-18 (data to 2025-06-16)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>13.46 (4.76)</td>
+<td style="text-align: right;">9.64 (6.60)</td>
+<td style="text-align: right;">+23.10 (7.58)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>0.01</td>
+<td style="text-align: right;">886 / 218</td>
+</tr>
+<tr>
+<td style="text-align: left;">Drop <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>±</mi><annotation encoding="application/x-tex">\pm</annotation></semantics></math>10 business days around Terra, FTX, SVB</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.67 (4.51)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.55 (4.57)</td>
+<td style="text-align: right;">+5.12 (5.50)</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">1072 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDT-only flows</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.67 (4.87)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>13.45 (7.08)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>2.79 (7.46)</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDC-only flows</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>16.58 (9.55)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.75 (8.52)</td>
+<td style="text-align: right;">+12.83 (9.98)</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">All USD-pegged aggregate</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.74 (2.62)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>9.23 (4.42)</td>
+<td style="text-align: right;">+1.51 (4.60)</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">1-day timing shift</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>11.06 (4.41)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.72 (4.31)</td>
+<td style="text-align: right;">+5.34 (5.30)</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">Flow window k = 1</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>11.54 (4.84)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>4.02 (7.98)</td>
+<td style="text-align: right;">+7.51 (10.33)</td>
+<td style="text-align: right;">0.47</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">Flow window k = 10</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>12.42 (3.98)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>8.01 (2.69)</td>
+<td style="text-align: right;">+4.42 (3.63)</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+<tr>
+<td style="text-align: left;">Lags-only controls</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>11.01 (4.41)</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.65 (4.54)</td>
+<td style="text-align: right;">+5.35 (5.28)</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">1135 / 312</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>“Pre” and “post” are relative to each row’s break date; in the placebo row “post” is 18 July 2024 to 16 June 2025 and the GENIUS period is outside the sample. USDT- and USDC-only rows use that coin’s own flows; the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> rows change the flow window, so “per USD 10 bn” refers to a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-day flow.</p>
+<h1 data-number="7" id="sec:discussion"><span class="header-section-number">7</span> Relation to Ahmed and Aldasoro (2025)</h1>
+<h4 class="unnumbered" id="what-is-replicated">What is replicated</h4>
+<p>We follow <span class="citation" data-cites="ahmed2025">[2]</span> in the flow definition (the five-day change in supply on trading days), the outcome (the 3-month bill), the estimator (local projections) and the inference (Newey–West). Our five-day flow moments (mean USD 0.83 bn, standard deviation 1.81) are close to theirs (0.88 and 1.74), although they use CoinMarketCap market capitalisation for seven coins and we use DefiLlama supply for 11.</p>
+<h4 class="unnumbered" id="what-differs">What differs</h4>
+<p>We use a much smaller set of controls and no instrument. Our pre-enactment estimate per USD 3.5 bn (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>3.8 bp) resembles their instrumented estimate in the June 2026 revision (about <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4</mn></mrow><annotation encoding="application/x-tex">-4</annotation></semantics></math> bp within ten days). It is several times larger than their controls-only estimate, which is below 1 bp and insignificant. Their controls include lead changes in the policy rate and in 6-month and 1-year yields, bill auction sizes and monetary-policy surprises, which absorb policy-path news that ours do not. Our <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math> therefore probably still contains confounding through expected policy rates. The insignificant spread result in Section <a href="#sec:results" data-reference-type="ref" data-reference="sec:results">5</a> points the same way. Our estimates should be read as conditional associations, and any resemblance to the instrumented magnitude as coincidence rather than corroboration.</p>
+<h4 class="unnumbered" id="what-is-added">What is added</h4>
+<p>The revision interacts flows with a post-2024 dummy and finds a <em>stronger</em> channel after 2024. Our pre-registered placebo at July 2024 points the other way in the controls-only design. Beyond that we add a legally dated break, a term-structure test motivated by the 93-day rule and seven additional months of post-enactment data.</p>
+<h1 data-number="8" id="sec:limits"><span class="header-section-number">8</span> Limitations</h1>
+<h4 class="unnumbered" id="endogeneity">Endogeneity</h4>
+<p>Stablecoin flows respond to interest rates. The coins pay no yield, and the BIS documents larger redemptions after monetary tightening <span class="citation" data-cites="bis2025aer">[1]</span>. Flows also respond to risk appetite in crypto markets. Without an instrument, our coefficients are associations conditional on the controls, not causal effects. In particular, we cannot rule out that the pre-enactment association reflects rates moving supply rather than supply moving rates.</p>
+<h4 class="unnumbered" id="short-post-sample-and-low-power">Short post sample and low power</h4>
+<p>With 312 post-enactment observations at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">h=10</annotation></semantics></math>, the minimum detectable change is about 15 bp per USD 10 bn (Section <a href="#sec:robustness" data-reference-type="ref" data-reference="sec:robustness">6</a>).</p>
+<h4 class="unnumbered" id="the-act-is-not-yet-binding">The Act is not yet binding</h4>
+<p>The reserve requirements take effect on 18 January 2027. Our post-enactment regime measures anticipation, and it coincides with Federal Reserve easing and the run-down of ON RRP balances. A regime dummy cannot separate these.</p>
+<h4 class="unnumbered" id="measurement">Measurement</h4>
+<p>Circulating supply is not reserve purchases. Issuers differ in how much of their reserves they hold in bills rather than in repo, deposits or money market funds, and this mix changes over time. DefiLlama data are also revised retroactively, so a later vintage may differ slightly.</p>
+<h4 class="unnumbered" id="inference-1">Inference</h4>
+<p>Overlapping horizons make points on each response highly correlated. We make no correction for testing 5 tenors <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math> 21 horizons <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math> 2 regimes. Local projections in samples of a few hundred observations can be biased at long horizons, which argues for caution at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">h=20</annotation></semantics></math>.</p>
+<h1 data-number="9" id="sec:conclusion"><span class="header-section-number">9</span> Conclusion</h1>
+<p>In the fifteen months after the GENIUS Act became law, stablecoin inflows have not been associated with a larger fall in 3-month Treasury-bill yields than before. The point estimate is about half the pre-enactment one (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>5.6 against <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>−</mi><annotation encoding="application/x-tex">-</annotation></semantics></math>10.9 bp per USD 10 bn at ten days), and the difference is imprecise (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">p=0.30</annotation></semantics></math>). The concentration of the association at the shortest maturities predates the Act. The outflow asymmetry seen before enactment is absent after it and is plausibly an artefact of the 2022–23 tightening cycle. A significant placebo break shows that the controls-only association is unstable, so even a significant change could not have been credited to the law.</p>
+<p>None of this establishes that the Act has no effect on bill pricing. The rules are not yet binding, the post-enactment sample is short and the design is underpowered. Re-estimating the same pre-registered specification once the reserve rules have bound for a year, and with an instrument such as that of <span class="citation" data-cites="ahmed2025">[2]</span>, would be the natural next step. The pipeline is built so that this requires only <code>make refresh</code>.</p>
+<h1 class="unnumbered" id="app:repro">Appendix A: Reproducibility</h1>
+<p>The repository (<a href="https://github.com/thanatchon36/stablecoin-tbills-genius-act" class="uri">https://github.com/thanatchon36/stablecoin-tbills-genius-act</a>) contains the raw data as downloaded (except two copyrighted series; see below), the code, the pre-analysis plan, a timestamped research log (<code>docs/FINDINGS.md</code>) and this paper.</p>
+<ul>
+<li><p><code>make all</code> rebuilds the panel from the cached raw files, runs the data-sanity tests, estimates every pre-registered specification, writes the figures and tables, and regenerates <code>paper/numbers.tex</code>, <code>paper/tables/</code> and <code>paper/figures/</code>. It runs in under a minute, and every output is byte-identical across runs. The S&amp;P 500 and VIX series are copyrighted and not redistributed, so on first run they are downloaded from FRED; every other raw file is in the repository.</p></li>
+<li><p><code>make paper</code> builds this PDF with a pinned Tectonic release (downloaded with a SHA-256 check if absent).</p></li>
+<li><p><code>make refresh</code> downloads a new vintage of every source and rebuilds.</p></li>
+</ul>
+<p>Every number in the prose is a macro generated by <code>src/viz/paper_tex.py</code> from <code>output/tables/lp_results.json</code>. Literature values and legal dates are typed and cited.</p>
+<h1 class="unnumbered" id="app:universe">Appendix B: Stablecoin Universe</h1>
+<div id="tab:universe">
+<table>
+<caption>Primary universe (fiat-backed USD payment stablecoins)</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Coin</th>
+<th style="text-align: right;">DefiLlama id</th>
+<th style="text-align: right;">First snapshot</th>
+<th style="text-align: right;">Supply 29 Oct 2026 (USD bn)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">USDT</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2017-11-29</td>
+<td style="text-align: right;">180.48</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDC</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2018-09-11</td>
+<td style="text-align: right;">71.48</td>
+</tr>
+<tr>
+<td style="text-align: left;">FDUSD</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">2023-05-27</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr>
+<td style="text-align: left;">PYUSD</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">2023-08-08</td>
+<td style="text-align: right;">3.04</td>
+</tr>
+<tr>
+<td style="text-align: left;">TUSD</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">2019-01-05</td>
+<td style="text-align: right;">0.48</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDP</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">2018-09-11</td>
+<td style="text-align: right;">0.02</td>
+</tr>
+<tr>
+<td style="text-align: left;">BUSD</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2020-04-17</td>
+<td style="text-align: right;">0.03</td>
+</tr>
+<tr>
+<td style="text-align: left;">RLUSD</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">2024-08-23</td>
+<td style="text-align: right;">2.61</td>
+</tr>
+<tr>
+<td style="text-align: left;">USD1</td>
+<td style="text-align: right;">262</td>
+<td style="text-align: right;">2025-04-28</td>
+<td style="text-align: right;">3.89</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDG</td>
+<td style="text-align: right;">286</td>
+<td style="text-align: right;">2025-07-12</td>
+<td style="text-align: right;">3.07</td>
+</tr>
+<tr>
+<td style="text-align: left;">USDGO</td>
+<td style="text-align: right;">347</td>
+<td style="text-align: right;">2026-02-17</td>
+<td style="text-align: right;">1.29</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 class="unnumbered" id="app:deviations">Appendix C: Deviations from the Pre-Analysis Plan</h1>
+<ol>
+<li><p><em>Gap rule</em> (amended before any regression): the PAP first set the aggregate to missing on days when a constituent coin had a gap longer than three days. This was changed to excluding that coin from the aggregate on those days, as the original brief specified. The only affected long gap (RLUSD, August–September 2024) predates its launch, when its supply was approximately zero.</p></li>
+<li><p><em>Summary statistics</em> (descriptive only): the first version computed five-day flows after truncating the sample, which dropped five observations. Flows are now computed before truncation, so the descriptive sample matches the regression sample. No estimate changed.</p></li>
+<li><p><em>Fallback sources</em>: CoinGecko and Treasury.gov fallbacks were configured but not needed, because no primary source failed.</p></li>
+</ol>
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-bis2025aer" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">Bank for International Settlements, <span>“The next-generation monetary and financial system.”</span> Annual Economic Report 2025, Chapter III, Jun. 2025. Available: <a href="https://www.bis.org/publ/arpdf/ar2025e3.htm">https://www.bis.org/publ/arpdf/ar2025e3.htm</a></div>
+</div>
+<div id="ref-ahmed2025" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">R. Ahmed and I. Aldasoro, <span>“Stablecoins and safe asset prices,”</span> Bank for International Settlements, BIS Working Papers 1270, May 2025. Available: <a href="https://www.bis.org/publications/working-paper-1270-stablecoins-and-safe-asset-prices">https://www.bis.org/publications/working-paper-1270-stablecoins-and-safe-asset-prices</a></div>
+</div>
+<div id="ref-genius2025" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">United States Congress, <span>“<span class="nocase">Guiding and Establishing National Innovation for <span>U.S.</span> Stablecoins Act (<span>GENIUS</span> Act)</span>.”</span> Public Law 119-27, 139 Stat. 419 (S. 1582), approved 18 July 2025, 2025. Available: <a href="https://www.govinfo.gov/app/details/PLAW-119publ27">https://www.govinfo.gov/app/details/PLAW-119publ27</a></div>
+</div>
+<div id="ref-occ2026" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Office of the Comptroller of the Currency, <span>“<span class="nocase">Final Rule Implementing the <span>GENIUS</span> Act</span>.”</span> OCC Bulletin 2026-50, Oct. 2026.</div>
+</div>
+<div id="ref-jorda2005" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Ò. Jordà, <span>“Estimation and inference of impulse responses by local projections,”</span> <em>American Economic Review</em>, vol. 95, no. 1, pp. 161–182, 2005, doi: <a href="https://doi.org/10.1257/0002828053828518">10.1257/0002828053828518</a>.</div>
+</div>
+<div id="ref-vayanos2021" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">D. Vayanos and J.-L. Vila, <span>“A preferred-habitat model of the term structure of interest rates,”</span> <em>Econometrica</em>, vol. 89, no. 1, pp. 77–112, 2021, doi: <a href="https://doi.org/10.3982/ECTA17440">10.3982/ECTA17440</a>.</div>
+</div>
+<div id="ref-defillama" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">DefiLlama, <span>“<span>Stablecoins <span>API</span></span>.”</span> <a href="https://stablecoins.llama.fi" class="uri">https://stablecoins.llama.fi</a>.</div>
+</div>
+<div id="ref-fred" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Federal Reserve Bank of St. Louis, <span>“<span><span>FRED</span>, Federal Reserve Economic Data</span>.”</span> <a href="https://fred.stlouisfed.org" class="uri">https://fred.stlouisfed.org</a>.</div>
+</div>
+<div id="ref-neweywest1987" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">W. K. Newey and K. D. West, <span>“A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix,”</span> <em>Econometrica</em>, vol. 55, no. 3, pp. 703–708, 1987, doi: <a href="https://doi.org/10.2307/1913610">10.2307/1913610</a>.</div>
+</div>
+<div id="ref-montiel2021" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">J. L. Montiel Olea and M. Plagborg-Møller, <span>“Local projection inference is simpler and more robust than you think,”</span> <em>Econometrica</em>, vol. 89, no. 4, pp. 1789–1823, 2021, doi: <a href="https://doi.org/10.3982/ECTA18756">10.3982/ECTA18756</a>.</div>
+</div>
+</div>
+</article>
+<section class="cite" aria-label="How to cite"><h2>How to cite</h2><pre><code>@techreport{chongmankhong2026genius,
+  author = {Chongmankhong, Thanatchon},
+  title  = {Stablecoin Flows and Treasury-Bill Yields after the {GENIUS} Act: A Pre-Registered Replication-in-Spirit},
+  year   = {2026},
+  type   = {Working paper},
+  url    = {https://thanatchon36.github.io/stablecoin-tbills-genius-act/}
+}</code></pre></section>
+<footer class="colophon"><p>Pre-registration, code, analysis and manuscript draft by Claude (Anthropic) under the author's written brief; the author directed the work and is responsible for the content. Associations, not causal effects.</p><p>Rendered from <code>paper/paper.tex</code> by <code>make paper</code>. Every number comes from <code>output/tables/lp_results.json</code> through <code>paper/numbers.tex</code>; the PDF is authoritative.</p></footer>
+</div>
+</body>
+</html>

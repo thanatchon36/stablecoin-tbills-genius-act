@@ -7,3 +7,9 @@ __pycache__/
 paper/*.log
 paper/*.blg
 paper/*.aux
+
+# Not redistributable (S&P Dow Jones Indices, Cboe): fetched from FRED by `make all`
+data/raw/fred_SP500_*
+data/raw/fred_VIXCLS_*
+# Contains SP500/VIXCLS columns; rebuilt by `make all`
+data/processed/panel.parquet

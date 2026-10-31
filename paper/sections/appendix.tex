@@ -1,7 +1,7 @@
 \section{Reproducibility}\label{app:repro}
-The repository (\repo) contains the raw data as downloaded, the code, the pre-analysis plan, a timestamped research log (\texttt{docs/FINDINGS.md}) and this paper.
+The repository (\repo) contains the raw data as downloaded (except two copyrighted series; see below), the code, the pre-analysis plan, a timestamped research log (\texttt{docs/FINDINGS.md}) and this paper.
 \begin{itemize}
-\item \texttt{make all} rebuilds the panel from the cached raw files, runs the data-sanity tests, estimates every pre-registered specification, writes the figures and tables, and regenerates \texttt{paper/numbers.tex}, \texttt{paper/tables/} and \texttt{paper/figures/}. It runs offline in under a minute, and every output is byte-identical across runs.
+\item \texttt{make all} rebuilds the panel from the cached raw files, runs the data-sanity tests, estimates every pre-registered specification, writes the figures and tables, and regenerates \texttt{paper/numbers.tex}, \texttt{paper/tables/} and \texttt{paper/figures/}. It runs in under a minute, and every output is byte-identical across runs. The S\&P~500 and VIX series are copyrighted and not redistributed, so on first run they are downloaded from FRED; every other raw file is in the repository.
 \item \texttt{make paper} builds this PDF with a pinned Tectonic release (downloaded with a SHA-256 check if absent).
 \item \texttt{make refresh} downloads a new vintage of every source and rebuilds.
 \end{itemize}
