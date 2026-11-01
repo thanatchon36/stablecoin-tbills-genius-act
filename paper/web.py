@@ -255,7 +255,6 @@ def main() -> int:
         f'<li><a href="{DATA_URL}">Data</a></li>'
         f'<li><a href="{blob}/docs/PAP.md">Pre-analysis plan</a></li>'
         f'<li><a href="{blob}/docs/FINDINGS.md">Research log</a></li>'
-        f'<li><a href="{blob}/docs/SUMMARY_TH.md">สรุปภาษาไทย</a></li>'
     )
     if d:
         actions += f'<li><a href="https://doi.org/{d}">DOI {d}</a></li>'
