@@ -170,7 +170,7 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 ## Phase 4 — Writing (2026-10-31T11:26Z)
 
 - README.md written (11 sections). The prose is ~1,570 words excluding tables, code and references; the abstract is 138 words.
-- docs/LINKEDIN.md: post body 1,229 characters, no emoji, 2-line alt-text. docs/SUMMARY_TH.md: 10 lines. docs/REPO_META.md: About text and topics verbatim from the brief.
+- docs/LINKEDIN.md: post body 1,229 characters, no emoji, 2-line alt-text. docs/REPO_META.md: About text and topics verbatim from the brief.
 - Every number in the text was re-read from output/tables/lp_results.json (scaled ×10 or ×3.5) before writing. The README also adds δ₂₀ = +19.6 bp (p = 0.08) so the long-horizon gap is not hidden.
 - Statute citation checked against the govinfo text: Public Law 119-27, 139 Stat. 419.
 - "Why this matters" quotes the BIS AER 2025 Chapter III (ar2025e3.htm): "can already depress Treasury yields by around 2.5–5 basis points", and Treasury holdings "on par with large jurisdictions and government money market funds".
@@ -183,7 +183,7 @@ Primary (DTB3, h = 10, per USD 10 bn 5-day inflow; Table 1):
 - **Summary-stats correction:** the 5-day flow was computed *after* truncating to 2021-01-04, which dropped 5 days. It is now computed before truncation, so N = 1,457 matches the regression sample.
   - Revised moments: full sample mean 0.83 / s.d. 1.81; pre 0.90 / 1.77; post 0.59 / 1.91.
   - The Phase 1 table above (0.82 / 0.89) is kept as logged. The README uses the corrected values. No regression input changed.
-- **Number check:** every number in README.md, docs/LINKEDIN.md and docs/SUMMARY_TH.md was compared with output/tables/*.md and lp_results.json (scaled ×10 or ×3.5). All match after the correction above.
+- **Number check:** every number in README.md and docs/LINKEDIN.md was compared with output/tables/*.md and lp_results.json (scaled ×10 or ×3.5). All match after the correction above.
 - **ruff:** clean.
 - **[VERIFY] items:** none are open in README or docs. Items to verify by hand before publication:
   1. the OCC Bulletin 2026-50 date and wording, taken from a news and OCC web search, not the Federal Register text;

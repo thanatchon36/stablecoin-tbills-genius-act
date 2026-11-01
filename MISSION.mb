@@ -89,7 +89,7 @@ Repo layout (create exactly this; no notebooks required):
     tests/test_data_sanity.py
     data/raw/  data/processed/     # commit processed parquet + small raw files (<50 MB total)
     output/figures/  output/tables/
-    docs/PAP.md  FINDINGS.md  LINKEDIN.md  SUMMARY_TH.md  REPO_META.md
+    docs/PAP.md  FINDINGS.md  LINKEDIN.md  REPO_META.md
 
 Standards: Python 3.11+ in a venv (`python3 -m venv .venv`), type hints, small pure functions, docstrings, `logging` not `print` for pipeline steps, deterministic (fixed seed if anything is bootstrapped), ruff-clean if available. No classes unless they simplify. No Docker, no dashboards, no ML, no GPU libraries.
 
@@ -114,7 +114,7 @@ Repo metadata: the GitHub repo is `stablecoin-tbills-genius-act`. Write docs/REP
 | 1 Data | 0:30–3:00 | 20/80 | fetchers, aligned panel, tests green, fig3 draft, summary stats → ⏸ CHECKPOINT 1: show me summary stats + fig3 |
 | 2 Estimation | 3:00–6:30 | 40/60 | primary LP, term structure, asymmetry, robustness table → ⏸ CHECKPOINT 2: show me table1 + a text summary of the IRFs; **tell me plainly if the result is null** |
 | 3 Figures | 6:30–8:00 | 30/70 | all figures final |
-| 4 Writing | 8:00–10:30 | 90/10 | README note, LINKEDIN.md, SUMMARY_TH.md, REPO_META.md → ⏸ CHECKPOINT 3: show drafts before polishing |
+| 4 Writing | 8:00–10:30 | 90/10 | README note, LINKEDIN.md, REPO_META.md → ⏸ CHECKPOINT 3: show drafts before polishing |
 | 5 QA/buffer | 10:30–12:00 | 50/50 | `make all` works from a clean clone; every number in the text matches the tables; [VERIFY] items resolved or listed |
 If a phase runs >25% over budget, cut from the optional and robustness lists first — never from the primary spec, the tests or the note.
 
@@ -133,8 +133,6 @@ README.md (≈1,200–1,800 words):
 11. References: Ahmed & Aldasoro (2025) BIS WP [VERIFY no.]; BIS Annual Economic Report 2025, stablecoin chapter [VERIFY chapter]; Jordà (2005); Newey & West (1987); GENIUS Act, Public Law 119-27 [VERIFY].
 
 docs/LINKEDIN.md (≤1,500 characters, English): line 1 is a hook containing the key number; one sentence on what the GENIUS Act requires; three short findings with magnitudes; one sentence of limitations; "Code + data: https://github.com/<my-handle>/stablecoin-tbills-genius-act"; credit the anchor paper and name its authors (I will tag them); at most one emoji; hashtags #stablecoins #Treasuries #BIS #monetarypolicy. Add two lines of alt-text for the chart.
-
-docs/SUMMARY_TH.md: a 10-line Thai summary of findings and caveats for me.
 
 Language rules: never write "stablecoins cause…"; use "is associated with", "consistent with", "we cannot rule out". Quantify every claim. No words like "massive" or "game-changing".
 
