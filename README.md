@@ -13,8 +13,7 @@
 🌐 **[Read the paper online](https://thanatchon36.github.io/stablecoin-tbills-genius-act/)** ·
 📄 **[Download the PDF](https://github.com/thanatchon36/stablecoin-tbills-genius-act/raw/main/paper/paper.pdf)** ·
 🤗 **[Data](https://huggingface.co/datasets/thanatchon36/stablecoin-tbills-genius-act)** ·
-📝 **[Pre-analysis plan](docs/PAP.md)** ·
-🇹🇭 **[สรุปภาษาไทย](docs/SUMMARY_TH.md)**
+📝 **[Pre-analysis plan](docs/PAP.md)**
 
 **Do stablecoin flows move US Treasury-bill yields differently after the GENIUS Act?** The Act (Public Law 119-27,
 signed 18 July 2025) restricts the Treasury reserves of US payment-stablecoin issuers to securities maturing within
